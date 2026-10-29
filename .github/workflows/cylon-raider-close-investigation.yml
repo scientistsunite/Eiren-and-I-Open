@@ -1,0 +1,29 @@
+name: Cylon Raider tray-close investigation
+on:
+  push:
+    branches: [cylon-raider-close-investigation]
+    paths: ['Cylon-Raider/**', '.github/workflows/cylon-raider-close-investigation.yml']
+permissions:
+  contents: read
+concurrency:
+  group: cylon-raider-close-investigation
+  cancel-in-progress: false
+jobs:
+  native-close:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      RAIDER_UX_FIXTURE: github-hosted-disposable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.403'
+      - name: Probe real window visibility and handle recreation through one tray-close request
+        shell: pwsh
+        run: dotnet run --project Cylon-Raider/Windows/tests/Raider.UxTests -c Release -- --close-probe
+      - name: Verify existing unified UI and exit regressions
+        shell: pwsh
+        run: dotnet run --no-build --project Cylon-Raider/Windows/tests/Raider.UxTests -c Release

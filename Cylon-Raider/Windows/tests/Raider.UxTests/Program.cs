@@ -4,7 +4,7 @@ using Raider.History;
 using Raider.Service;
 using System.Reflection;
 
-internal static class Program
+internal static partial class Program
 {
     static int checks;
     static readonly DateTime Epoch = new(2026, 10, 29, 12, 0, 0, DateTimeKind.Utc);
@@ -240,6 +240,7 @@ internal static class Program
                 try
                 {
                     await Task.Delay(100);
+                    if(Environment.GetCommandLineArgs().Contains("--close-probe")){await TrayCloseRegressions(window);return;}
                     Check(window.Visible && window.ShowInTaskbar, "Explicit application launch opens the unified window despite automatic-launch tray preferences");
                     Check(typeof(MainWindow).GetField("pipe", BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(window) == null, "Unified shell fixture has not started an ETW collector");
                     var nav = Field<ListBox>(window, "navigation");
@@ -364,6 +365,8 @@ internal static class Program
                 {
                     try
                     {
+                        var preferencesField=typeof(MainWindow).GetField("preferences",BindingFlags.Instance|BindingFlags.NonPublic)!;
+                        preferencesField.SetValue(window,Field<Preferences>(window,"preferences") with{ContinueInTray=false});
                         window.Close();
                         for(int attempt=0;attempt<200&&!window.IsDisposed;attempt++)await Task.Delay(25);
                         Check(window.IsDisposed,"One close request completes shutdown without reopening an application window");

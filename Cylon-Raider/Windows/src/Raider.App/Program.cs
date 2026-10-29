@@ -51,7 +51,10 @@ sealed partial class MainWindow : Form
         start.Click+=async(_,_)=>{if(starting||pipe!=null)await PauseMonitoring();else await StartMonitoring();};stopButton.Click+=async(_,_)=>await PauseMonitoring();sort.SelectedIndexChanged+=(_,_)=>Render();
         var menu=new ContextMenuStrip();menu.Items.Add("Open Cylon Raider",null,(_,_)=>Restore());trayMonitoring=new ToolStripMenuItem("Start Monitoring");trayMonitoring.Click+=async(_,_)=>{if(pipe==null)await StartMonitoring();else await PauseMonitoring();};menu.Items.Add(trayMonitoring);menu.Items.Add("View Logs",null,(_,_)=>ShowHistory());menu.Items.Add("Options",null,(_,_)=>ShowOptions());menu.Items.Add("Exit",null,async(_,_)=>await ExitApp());
         tray=new NotifyIcon{Icon=Icon,Text="Cylon Raider — stopped",Visible=true,ContextMenuStrip=menu};tray.MouseClick+=(_,e)=>{if(e.Button==MouseButtons.Left)Restore();};
-        FormClosing+=(_,e)=>{if(exiting)return;e.Cancel=true;if(preferences.ContinueInTray){Hide();ShowInTaskbar=false;}else BeginInvoke((Action)(()=>_=ExitApp()));};
+        // A hidden top-level window is already absent from the taskbar. Changing
+        // ShowInTaskbar recreates its HWND; WinForms reapplies maximized/minimized
+        // placement during that recreation and can show the just-hidden window.
+        FormClosing+=(_,e)=>{if(exiting)return;e.Cancel=true;if(preferences.ContinueInTray){Hide();}else BeginInvoke((Action)(()=>_=ExitApp()));};
         health.Tick+=(_,_)=>{
             UpdateMonitoringIndicator();
             logging.Text=(boot!=null?servicePersistence+" | "+serviceReports:writer?.Status+" | "+reports?.Status)+(storageError==null?"":" | "+storageError)+(settings.Warning==null?"":" | "+settings.Warning);
@@ -64,7 +67,7 @@ sealed partial class MainWindow : Form
         };health.Start();Microsoft.Win32.SystemEvents.TimeChanged+=ClockChanged;
         Shown+=async(_,_)=>{
             FitWindowToWorkArea();StartupEvidence.Mark("window shown");
-            if(!smoke&&Environment.GetCommandLineArgs().Contains("--startup")&&(preferences.StartInTray||!preferences.OpenMainAtLaunch)){Hide();ShowInTaskbar=false;}
+            if(!smoke&&Environment.GetCommandLineArgs().Contains("--startup")&&(preferences.StartInTray||!preferences.OpenMainAtLaunch)){Hide();}
             if(smoke){var timer=new System.Windows.Forms.Timer{Interval=75000};timer.Tick+=async(_,_)=>{timer.Stop();timer.Dispose();await ExitApp();};timer.Start();}
             if(smoke||preferences.AutoMonitor||boot!=null)await StartMonitoring(false);
         };
@@ -100,7 +103,7 @@ sealed partial class MainWindow : Form
     }
     void ClockChanged(object? sender,EventArgs args){TimeZoneInfo.ClearCachedData();writer?.State(HistoryState.ClockChange,"System clock/timezone change; no missing coverage is fabricated");}
     protected override void WndProc(ref Message message){if(message.Msg==PlatformPaths.RestoreMessage){Restore();return;}if(message.Msg==PlatformPaths.ShutdownMessage){_=ExitApp();return;}base.WndProc(ref message);}
-    void Restore(){if(exiting||IsDisposed||Disposing)return;ShowInTaskbar=true;Show();Render();if(WindowState==FormWindowState.Minimized)WindowState=FormWindowState.Normal;Activate();}
+    void Restore(){if(exiting||IsDisposed||Disposing)return;Show();Render();if(WindowState==FormWindowState.Minimized)WindowState=FormWindowState.Normal;Activate();}
     void ShowHistory(){Restore();navigation.SelectedIndex=4;OpenHistoryWindow();}
     void ShowOptions(){Restore();navigation.SelectedIndex=8;}
     void EnsureOptions(int section)
