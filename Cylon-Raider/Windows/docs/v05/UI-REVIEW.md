@@ -25,8 +25,8 @@ Alt+Home opens Dashboard. Ctrl+1 through Ctrl+9 and Ctrl+0 select sections. Side
 
 ## Validation
 
-The final [Windows run40903515615](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615) passed original measurement19, history60, quality/provenance76, native settings78 and unified UX3823 assertions, offline guard, self-contained publishing, installer compilation and artifact upload. [Build results](BUILD-RESULTS.md) identify the exact source and download.
+The final [Windows run 40903515615](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615) passed original measurement: 19, history: 60, quality/provenance: 76, native settings: 78 and unified UX: 3,823 assertions, offline guard, self-contained publishing, installer compilation and artifact upload. [Build results](BUILD-RESULTS.md) identify the exact source and download.
 
-The fixture tests actual display-fitted windows at100/125/150/200% font sizes, all sections, control containment and non-overlap, reachable Apply/Discard actions, useful History viewports and stable scrolling with over1,300 identities. Synthetic app-only previews were inspected. No collector/service/user profile was opened.
+The fixture tests actual display-fitted windows at 100/125/150/200% font sizes, all sections, control containment and non-overlap, reachable Apply/Discard actions, useful History viewports and stable scrolling with over 1,300 identities. Synthetic app-only previews were inspected. No collector was started; no service or existing user data was used.
 
 Physical DPI/multi-monitor, real ETW, boot service, installer upgrade/uninstall and long-duration acceptance remain unverified by this UI workflow. No old release, tag or asset is replaced. Cross-builds also passed with zero warnings/errors, and the public scaffold layout check passed.

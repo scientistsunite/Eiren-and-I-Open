@@ -13,8 +13,8 @@
 
 - Source: `b82a8d0426a78bbff04608b2a26d9d26273a9765`.
 - Windows run: https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615 — passed.
-- Original measurement19, history60, quality/provenance76, native settings78 and unified UX3823 assertions passed; network API guard, self-contained Windows x64 publishing, Inno Setup compilation and artifact upload passed.
-- The UX fixture covers 1,300+ identities, retained vertical/horizontal scroll and offscreen selection, all ten sections, no second application window, draft discard, compact History and actual fitted layouts at100/125/150/200% font sizes. No collector/service/user profile was used.
+- Original measurement: 19, history: 60, quality/provenance: 76, native settings: 78 and unified UX: 3,823 assertions passed; network API guard, self-contained Windows x64 publishing, Inno Setup compilation and artifact upload passed.
+- The UX fixture covers 1,300+ identities, retained vertical/horizontal scroll and offscreen selection, all ten sections, no second application window, draft discard, compact History and actual fitted layouts at 100/125/150/200% font sizes. No collector was started; no service or existing user data was used.
 - Installer, portable/source archives, SHA256 checksums and provenance are in the downloadable artifact. See `Windows/docs/v05/BUILD-RESULTS.md` for links and installer checksum.
 - Final documentation records this verified source; it does not alter application, tests, installer or workflow inputs.
 
