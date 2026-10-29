@@ -23,3 +23,9 @@
 Unsigned preliminary Windows x64 build for user testing. Physical DPI/multi-monitor, real ETW, boot-service and installer lifecycle/upgrade acceptance were not rerun in this UI workflow. Existing behavior is retained, not newly certified. Ubuntu/macOS remain placeholders. No new open-source reuse license is granted.
 
 Public shared memory was reviewed. Status is recorded here within the authorized app scope; unrelated shared files remain unchanged.
+
+## 2026-10-29 — Owner-requested version collection publication
+
+- User explicitly authorized adding the verified v0.5 preliminary files to existing Cylon Raider release 427955131 and renaming it `Cylon Raider — Windows`, with related versions grouped on that page.
+- The original `cylon-raider-windows-v0.4.0` tag and all three existing v0.4 asset IDs, names and checksums must remain unchanged. No new compilation, tag movement, release replacement, merge or other application changes are required.
+- A narrowly scoped publication workflow uses the successful run 40903515615 artifact 12910193270, checks its exact source/digest and package checksums, and appends versioned files only. Current status: publication guards and workflow are being prepared; no release change is yet claimed.
