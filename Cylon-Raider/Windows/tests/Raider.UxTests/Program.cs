@@ -193,6 +193,19 @@ internal static class Program
                             }
                             Check(Application.OpenForms.Cast<Form>().Where(form => form.TopLevel).SequenceEqual(new[] { window }), $"{scale:P0}: {expected[section]} opens no second application window");
                             CheckLayout(window, $"Font {scale:P0}, {expected[section]}");
+                            if (scale is 1f or 2f)
+                            {
+                                // Render only this synthetic fixture's controls. Never
+                                // capture the desktop, other windows, or a real profile.
+                                string previewRoot = Path.Combine(Environment.CurrentDirectory, "ui-previews");
+                                Directory.CreateDirectory(previewRoot);
+                                string sectionName = expected[section].Replace(" & ", "-").Replace(' ', '-').ToLowerInvariant();
+                                string destination = Path.Combine(previewRoot, $"font-{(int)(scale * 100)}-{section:D2}-{sectionName}.png");
+                                using var preview = new Bitmap(window.Width, window.Height);
+                                window.DrawToBitmap(preview, new Rectangle(Point.Empty, window.Size));
+                                preview.Save(destination, System.Drawing.Imaging.ImageFormat.Png);
+                                Console.WriteLine("SYNTHETIC APP PREVIEW " + Path.GetFileName(destination));
+                            }
                         }
                     }
                 }

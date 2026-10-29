@@ -26,7 +26,7 @@ sealed class HistoryWindow : Form
         var controls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true,Padding=new(12)};var refresh=new RoundedButton{Text="Refresh",AutoSize=true};var export=new RoundedButton{Text="Export seconds CSV",AutoSize=true};var reports=new RoundedButton{Text="Export hourly CSV",AutoSize=true};
         exportActions.AddRange([export,reports]);
         sort.Items.AddRange(["Combined","Downloads","Uploads"]);sort.SelectedIndex=0;controls.Controls.AddRange([date,hour,sort,refresh,export,reports]);
-        var tabs=new TabControl{Dock=DockStyle.Fill};foreach(var entry in new[]{("Applications",applications),("One-second details",seconds),("Coverage / lifecycle events",events)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
+        var tabs=new ThemedTabControl{Dock=DockStyle.Fill};foreach(var entry in new[]{("Applications",applications),("One-second details",seconds),("Coverage / lifecycle events",events)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
         var diagnosticTab=new TabPage("Unattributed diagnostics");
         var filters=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(filters);
         reason.Items.Add("All reasons");reason.Items.AddRange(Enum.GetNames<AttributionReason>());reason.SelectedIndex=0;

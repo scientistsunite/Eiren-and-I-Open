@@ -38,6 +38,14 @@ jobs:
           python-version: '3.13'
       - name: Build, verify UI and unchanged measurement/history contracts, package installer
         run: ./packaging/v05/build.ps1
+      - name: Synthetic application layout previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CylonRaider-0.5.0-synthetic-layout-previews
+          path: Cylon-Raider/Windows/ui-previews/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Downloadable preliminary installer and provenance
         uses: actions/upload-artifact@v4
         with:
