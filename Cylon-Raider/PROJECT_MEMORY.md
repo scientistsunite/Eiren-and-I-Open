@@ -1,13 +1,25 @@
 # Cylon Raider — Public Project Memory
 
-## 2026-10-29 — Windows v0.5 preliminary UI
+## 2026-10-29 — Windows v0.5 preliminary
 
-- User approved scoped source, original artwork and build-file use and public publication for Cylon Raider v0.5. Publication review excludes private history, memory, logs and unrelated applications.
-- One application window with ten sections. History/exports and configuration views are embedded; every v0.4 action is mapped in `Windows/docs/v05/UI-REVIEW.md`.
-- Silent Meteor Windows colors and rounded-control styling serve as a read-only reference. Other applications are unchanged.
-- App-only session index retains all observed application identities. Virtual grid updates preserve viewport and selection. Capture, persistence, reports and service implementations are unchanged except version identity metadata.
-- Explicit launches open the window; automatic sign-in launches retain tray preferences.
-- Windows run 40892953194 on source 4185c4b passed original measurement 19, history 60, quality/provenance 76, native Options 78 and unified UX 2,456 assertions; installer compilation and artifact upload succeeded. Local deterministic checks and zero-warning cross-builds also passed.
-- Source d425fc1 passed Windows run40894514248: original19/history60/quality76/nativeOptions78/UX2506, installer and artifacts. Preview inspection exposed a test-harness issue: oversized ClientSize requests on a smaller Windows desktop can retain phantom client dimensions. The fixture now uses fitted actual display bounds and stronger child/ancestor containment assertions. Caption/button/toolbar widths are constrained for compact layouts. Actual-fit run40896750539 found History toolbar clipping at150%font. History and diagnostic tools now scroll independently above space-reserved lists; the global status/actions area is also height-bounded. Replacement native validation is pending; no failed result is represented as installer acceptance.
-- Distribution remains preliminary and unsigned. Physical Windows, multi-monitor/DPI, real ETW, service and installer lifecycle acceptance remains outstanding. Existing releases/tags/assets are untouched.
-- Windows source and tests are present; Ubuntu/macOS remain placeholders. No new open-source reuse license has been granted.
+- Owner approved scoped publication of reviewed Cylon Raider Windows source, original artwork, synthetic tests and dedicated build files. No private Git history, memory or internal logs are imported. Other application files and existing releases/tags/assets are unchanged.
+- One application window contains Dashboard, Live Traffic, Top Applications Observed, Monitoring, History, Measurement Health, Storage, Startup Service, Settings and About & Maintenance. History/exports and configuration are embedded. Every existing action is mapped in `Windows/docs/v05/UI-REVIEW.md`.
+- Silent Meteor Windows theme is a read-only reference: dark blue-gray palette, rounded buttons, native dark title bar and one-second explicit tooltips. No Silent Meteor files are copied or changed.
+- The app-only session index retains all observed identities; the virtual application table preserves scroll and selection. Capture, measurement, history, report, storage and service implementations remain unchanged apart from version provenance.
+- Explicit launches open the window; automatic sign-in launches retain tray preferences. Apply and Discard provide explicit handling of settings drafts.
+- Compact layouts reserve actual native input heights and keep tools in bounded scrolling areas above usable lists. Window bounds are fitted after DPI changes. Tests use actual display bounds rather than oversized cached client dimensions.
+
+## Verified build
+
+- Source: `b82a8d0426a78bbff04608b2a26d9d26273a9765`.
+- Windows run: https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615 — passed.
+- Original measurement19, history60, quality/provenance76, native settings78 and unified UX3823 assertions passed; network API guard, self-contained Windows x64 publishing, Inno Setup compilation and artifact upload passed.
+- The UX fixture covers 1,300+ identities, retained vertical/horizontal scroll and offscreen selection, all ten sections, no second application window, draft discard, compact History and actual fitted layouts at100/125/150/200% font sizes. No collector/service/user profile was used.
+- Installer, portable/source archives, SHA256 checksums and provenance are in the downloadable artifact. See `Windows/docs/v05/BUILD-RESULTS.md` for links and installer checksum.
+- Final documentation records this verified source; it does not alter application, tests, installer or workflow inputs.
+
+## Limits
+
+Unsigned preliminary Windows x64 build for user testing. Physical DPI/multi-monitor, real ETW, boot-service and installer lifecycle/upgrade acceptance were not rerun in this UI workflow. Existing behavior is retained, not newly certified. Ubuntu/macOS remain placeholders. No new open-source reuse license is granted.
+
+Public shared memory was reviewed. Status is recorded here within the authorized app scope; unrelated shared files remain unchanged.

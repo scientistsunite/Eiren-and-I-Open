@@ -25,10 +25,8 @@ Alt+Home opens Dashboard. Ctrl+1 through Ctrl+9 and Ctrl+0 select sections. Side
 
 ## Validation
 
-- Cross-build: application and UX test project compile with zero warnings/errors on .NET SDK 10.0.403 using Windows targeting.
-- Source network API guard passed locally.
-- Windows run 40892953194 passed measurement/history/quality, 78 native settings assertions and 2,456 unified UX assertions, compiled the installer and uploaded artifacts. A replacement run validates final work-area and draft-discard refinements.
-- Dedicated Windows workflow runs original measurement, history, quality/provenance, native settings lifecycle/layout and new UX tests before producing an installer.
-- New UX fixtures use synthetic data for over 1,300 application identities and verify scroll, horizontal position, selection and stable rows. The unified-shell fixture is restricted to disposable hosted Windows, refuses preexisting app/service data, and never starts capture.
-- Windows native and installer-build results are recorded by the workflow and its artifact provenance. A successful cross-build alone does not establish Windows UI correctness.
-- Physical DPI, multi-monitor behavior, installer upgrade/uninstall, real ETW, boot service and long-duration acceptance remain unverified by this UI build. No old release, tag or asset is replaced.
+The final [Windows run40903515615](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615) passed original measurement19, history60, quality/provenance76, native settings78 and unified UX3823 assertions, offline guard, self-contained publishing, installer compilation and artifact upload. [Build results](BUILD-RESULTS.md) identify the exact source and download.
+
+The fixture tests actual display-fitted windows at100/125/150/200% font sizes, all sections, control containment and non-overlap, reachable Apply/Discard actions, useful History viewports and stable scrolling with over1,300 identities. Synthetic app-only previews were inspected. No collector/service/user profile was opened.
+
+Physical DPI/multi-monitor, real ETW, boot service, installer upgrade/uninstall and long-duration acceptance remain unverified by this UI workflow. No old release, tag or asset is replaced. Cross-builds also passed with zero warnings/errors, and the public scaffold layout check passed.
