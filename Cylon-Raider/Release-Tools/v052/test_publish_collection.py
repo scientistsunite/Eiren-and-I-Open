@@ -14,7 +14,7 @@ class Guards(unittest.TestCase):
 
     def inventory(self):
         baseline=json.loads((Path(__file__).parent/'baseline.json').read_text())
-        return {'id':self.engine.RELEASE_ID,'tag_name':self.engine.TAG,'immutable':False,'draft':False,'prerelease':True,'name':self.engine.TITLE,'body':baseline['body'],'assets':[{**asset,'state':'uploaded'} for asset in baseline['assets']]}
+        return {'id':self.engine.RELEASE_ID,'tag_name':self.engine.TAG,'immutable':False,'draft':False,'prerelease':True,'name':self.engine.TITLE,'body':self.engine.ORIGINAL_BODY,'assets':[{**asset,'state':'uploaded'} for asset in baseline['assets']]}
 
     def test_all_fifteen_existing_assets_are_preserved(self):
         self.assertEqual(len(self.engine.validate_release(self.inventory())),15)

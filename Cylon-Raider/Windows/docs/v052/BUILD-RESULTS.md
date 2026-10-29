@@ -3,7 +3,7 @@
 - Verified source: `36e4d96f8ed4933c108f942c5cd7a81da7bc840b`, based on merged public main `776d6c1` containing PR #4.
 - [Successful Windows build and validation](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40952435191).
 - [Complete downloadable build artifact](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40952435191/artifacts/12931728476).
-- Passed: measurement 19, history 60, quality/provenance 76, native settings 78, unified UI 3,916, and the targeted tray-close suite. The same targeted suite reported 53 checks in the earlier investigation; its native matrix also passed in this versioned build.
+- Passed: measurement 19, history 60, quality/provenance 76, native settings 78, unified UI 3,916, and 52 checks in the targeted tray-close suite. Its complete nine-case native matrix passed in this versioned build.
 - All nine tray cases (Dashboard, Monitoring, History × normal/maximized/minimized) report managedVisible=false, nativeVisible=false, recreated=false and disposed=false. Actual tray restoration, maximized-state preservation and one-close shutdown also passed.
 - Source network API guard, self-contained Windows x64 publishing, Inno Setup compilation and artifact upload passed.
 

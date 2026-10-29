@@ -24,7 +24,7 @@ def configure(config):
     engine.ORIGINAL_FILES = set(engine.PINNED_PAYLOADS) | set(engine.RENAMES) | {"SHA256SUMS.txt"}
     engine.NEW_FILES = set(engine.PINNED_PAYLOADS) | {engine.PROVENANCE, engine.README, engine.CHECKSUMS}
     baseline = json.loads((ROOT / "baseline.json").read_text())
-    engine.ORIGINAL_BODY = baseline["body"]
+    engine.ORIGINAL_BODY = (ROOT / "previous-publication-notes.md").read_text(encoding="utf-8")
     engine.BASELINE = {asset["name"]: (asset["id"], asset["size"], asset["digest"].removeprefix("sha256:")) for asset in baseline["assets"]}
     desired = (ROOT / "release-notes.md").read_text()
     engine.build_body = lambda: desired
