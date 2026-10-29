@@ -27,15 +27,21 @@ sealed class HistoryWindow : Form
         var controls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(controls);var refresh=new RoundedButton{Text="Refresh",AutoSize=true};var export=new RoundedButton{Text="Export seconds CSV",AutoSize=true};var reports=new RoundedButton{Text="Export hourly CSV",AutoSize=true};
         exportActions.AddRange([export,reports]);
         sort.Items.AddRange(["Combined","Downloads","Uploads"]);sort.SelectedIndex=0;controls.Controls.AddRange([AppTheme.Input(date),AppTheme.Input(hour),AppTheme.Input(sort),refresh,export,reports]);
-        var tabs=new ThemedTabControl{Dock=DockStyle.Fill};foreach(var entry in new[]{("Applications",applications),("One-second details",seconds),("Coverage / lifecycle events",events)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
-        var diagnosticTab=new TabPage("Unattributed diagnostics");
+        var tabs=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2};tabs.ColumnStyles.Add(new(SizeType.Percent,100));tabs.RowStyles.Add(new(SizeType.AutoSize));tabs.RowStyles.Add(new(SizeType.Percent,100));
+        var viewSelector=new ComboBox{Dock=DockStyle.Top,DropDownStyle=ComboBoxStyle.DropDownList,AccessibleName="History view",AccessibleDescription="Choose Applications, One-second details, Coverage / lifecycle events, Unattributed diagnostics, Integrity evidence, or Recording sessions / provenance. Use the arrow keys to switch views."};
+        var viewHost=new Panel{Dock=DockStyle.Fill};var views=new List<Panel>();tabs.Controls.Add(AppTheme.Input(viewSelector),0,0);tabs.Controls.Add(viewHost,0,1);
+        void AddView(string title,Panel view){view.Dock=DockStyle.Fill;view.Visible=false;views.Add(view);viewSelector.Items.Add(title);viewHost.Controls.Add(view);}
+        viewSelector.SelectedIndexChanged+=(_,_)=>{for(int index=0;index<views.Count;index++)views[index].Visible=index==viewSelector.SelectedIndex;};
+        foreach(var entry in new[]{("Applications",applications),("One-second details",seconds),("Coverage / lifecycle events",events)}){var tab=new Panel();tab.Controls.Add(entry.Item2);AddView(entry.Item1,tab);}
+        var diagnosticTab=new Panel();
         var filters=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(filters);
         reason.Items.Add("All reasons");reason.Items.AddRange(Enum.GetNames<AttributionReason>());reason.SelectedIndex=0;
         protocol.Items.Add("All protocols");protocol.Items.AddRange(Enum.GetNames<TrafficProtocol>());protocol.SelectedIndex=0;
         var diagnosticExport=AppTheme.Button("Export diagnostic CSV",()=>RequestExport(()=>ExportDiagnostics(false)));var integrityExport=AppTheme.Button("Export integrity CSV",()=>RequestExport(()=>ExportDiagnostics(true)));exportActions.AddRange([diagnosticExport,integrityExport]);
         filters.Controls.AddRange([AppTheme.Label("Recorded local date above · UTC range below (inclusive minutes)"),AppTheme.Input(fromTime),AppTheme.Input(toTime),AppTheme.Input(reason),AppTheme.Input(protocol),AppTheme.Input(pid),AppTheme.Button("Apply filters",()=>_=RefreshDiagnostics()),diagnosticExport,integrityExport]);
-        BoundedTools(diagnosticTab,attribution,.4f,filters,diagnosticNotice);tabs.TabPages.Add(diagnosticTab);
-        foreach(var entry in new[]{("Integrity evidence",integrity),("Recording sessions / provenance",sessions)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
+        BoundedTools(diagnosticTab,attribution,.4f,filters,diagnosticNotice);AddView("Unattributed diagnostics",diagnosticTab);
+        foreach(var entry in new[]{("Integrity evidence",integrity),("Recording sessions / provenance",sessions)}){var tab=new Panel();tab.Controls.Add(entry.Item2);AddView(entry.Item1,tab);}
+        viewSelector.SelectedIndex=0;
         var source=AppTheme.Label("Recorded history: "+FilePath);source.AccessibleName="History source file";
         var tools=new List<Control>{source,controls,summary,reportStatus};
         if(openReportFolder!=null)tools.Add(AppTheme.Button("Open hourly report folder",openReportFolder));
@@ -79,7 +85,7 @@ sealed class HistoryWindow : Form
                 }
             }finally{fitting=false;}
         }
-        layout.SizeChanged+=(_,_)=>Fit();viewport.SizeChanged+=(_,_)=>Fit();body.Layout+=(_,_)=>Fit();
+        layout.Layout+=(_,_)=>Fit();layout.SizeChanged+=(_,_)=>Fit();viewport.SizeChanged+=(_,_)=>Fit();body.Layout+=(_,_)=>Fit();
         Fit();
     }
     internal static void ApplicationClosing(bool value)

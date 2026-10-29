@@ -30,12 +30,12 @@ sealed partial class MainWindow
         Panel SpaciousPage(string title,Control list,params Control[] tools){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false,Padding=new(20,8,20,12)};
             var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};layout.ColumnStyles.Add(new(SizeType.Percent,100));
             layout.RowStyles.Add(new(SizeType.AutoSize));layout.RowStyles.Add(new(SizeType.Absolute,100));layout.RowStyles.Add(new(SizeType.Percent,100));
-            layout.Controls.Add(AppTheme.Label(title,true),0,0);
+            var pageTitle=AppTheme.Label(title,true);layout.Controls.Add(pageTitle,0,0);
             var toolBody=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};toolBody.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(toolBody);
             var toolViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};
             foreach(var tool in tools)AppTheme.Add(toolBody,tool);toolViewport.Controls.Add(toolBody);layout.Controls.Add(toolViewport,0,1);
-            bool fitting=false;void FitTools(){if(fitting)return;fitting=true;try{float desired=toolBody.GetPreferredSize(new(Math.Max(1,toolViewport.ClientSize.Width),0)).Height;float height=Math.Min(desired,Math.Max(48,viewport.ClientSize.Height*.55f));if(Math.Abs(layout.RowStyles[1].Height-height)>.5)layout.RowStyles[1].Height=height;}finally{fitting=false;}}
-            viewport.SizeChanged+=(_,_)=>FitTools();toolBody.SizeChanged+=(_,_)=>FitTools();
+            bool fitting=false;void FitTools(){if(fitting)return;fitting=true;try{float desired=toolBody.GetPreferredSize(new(Math.Max(1,toolViewport.ClientSize.Width),0)).Height;float limit=Math.Max(0,Math.Min(layout.ClientSize.Height*.45f,layout.ClientSize.Height-pageTitle.Height-pageTitle.Margin.Vertical-120));float height=Math.Min(desired,limit);if(Math.Abs(layout.RowStyles[1].Height-height)>.5)layout.RowStyles[1].Height=height;}finally{fitting=false;}}
+            layout.Layout+=(_,_)=>FitTools();viewport.SizeChanged+=(_,_)=>FitTools();toolBody.SizeChanged+=(_,_)=>FitTools();
             list.Dock=DockStyle.Fill;layout.Controls.Add(list,0,2);viewport.Controls.Add(layout);pageHost.Controls.Add(viewport);sections.Add(viewport);return viewport;}
         void SettingsPage(){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false};pageHost.Controls.Add(viewport);sections.Add(viewport);}
         var dashboard=Page("Dashboard");totals.Font=new("Segoe UI",25,FontStyle.Bold);totals.Dock=DockStyle.Top;totals.Margin=new(0,8,0,14);
