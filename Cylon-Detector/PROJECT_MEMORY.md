@@ -1,10 +1,10 @@
 # Cylon Detector — Public Project Memory
 
-**Status:** scaffold only. No implementation, release, working build, or supported operating system is claimed.
+**Status:** Concept and directory placeholders only. No Cylon Detector implementation, package or release is claimed.
 
 ## Scope and architecture
 
-Not decided in this public repository.
+Intended use: Review unusual local application/system behavior (planned concept). Implementation architecture remains to be reviewed in this public repository.
 
 ## Platform status
 
@@ -24,4 +24,10 @@ Only repository-level scaffolding checks are currently defined; they do not test
 
 ## Next steps
 
-Agree on a reviewed public implementation, license, platform-specific tests, and release criteria. Record dated decisions using [MEMORY_SYNC.md](../MEMORY_SYNC.md). Never import private project notes or files without explicit review and authorization.
+Review source rights, dependencies, platform-specific tests, and release criteria before importing implementation. Record dated decisions using [MEMORY_SYNC.md](../MEMORY_SYNC.md). Never import private project notes or files without explicit review and authorization.
+
+## 2026-10-29 — MIT license and intended use
+
+- **Decision:** This app directory includes an MIT LICENSE for project-owned published material, subject to separate third-party rights.
+- **Verification:** Documentation only; no new runtime or functional test evidence.
+- **Follow-up:** Review licensing of specific historical downloadable assets separately; this update does not repackage or automatically relicense them.
