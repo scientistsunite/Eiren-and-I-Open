@@ -1,11 +1,17 @@
 # Cylon Raider
 
-**Public status:** placeholder only. No application source code, installers, binaries, releases, or previous development history have been published here.
+**Intended use:** Understand which Windows applications send and receive network traffic, inspect live activity, compare observed applications and examine local history and reports. The intended security boundary is that Cylon Raider observes traffic using local operating-system facilities without initiating its own network communications. It is an observability tool, not a firewall or a promise of packet-content inspection.
+
+**Public status:** Windows source, tests and build/release tooling are present in [Windows](Windows/), with Windows installer, portable and version-specific source downloads in [Releases](https://github.com/scientistsunite/Eiren-and-I-Open/releases). Some physical-device, ETW, boot-service and installer acceptance testing remains outstanding; see release-specific evidence. Ubuntu/macOS source directories are placeholders.
 
 ## Reserved platforms
 
-- [Windows](Windows/) — placeholder, not a support commitment.
+- [Windows](Windows/) — public Windows source and prerelease distributions.
 - [Ubuntu](Ubuntu/) — placeholder, not a support commitment.
 - [macOS](macOS/) — placeholder, not a support commitment.
 
-Record approved decisions in [PROJECT_MEMORY.md](PROJECT_MEMORY.md) and use the [shared testing policy](../testing/TEST_POLICY.md). Review source, credentials, dependencies, and licensing before any implementation is added.
+## Licensing and development
+
+Project-owned source and original project material in this directory are available under the [MIT License](LICENSE), subject to [third-party distribution notices](Windows/docs/THIRD-PARTY.md) and any material-specific restrictions. This documentation update does not alter existing downloaded assets or supersede their included notices.
+
+See [project memory](PROJECT_MEMORY.md) and the [shared testing policy](../testing/TEST_POLICY.md).
