@@ -2,7 +2,7 @@
 
 ## 2026-10-29 — Windows v0.5 preliminary
 
-- Owner approved scoped publication of reviewed Cylon Raider Windows source, original artwork, synthetic tests and dedicated build files. No private Git history, memory or internal logs are imported. Other application files and existing releases/tags/assets are unchanged.
+- Owner approved scoped publication of reviewed Cylon Raider Windows source, original artwork, synthetic tests and dedicated build files. No private Git history, memory or internal logs are imported. Other application files and releases are unchanged; later Cylon collection publication is recorded below.
 - One application window contains Dashboard, Live Traffic, Top Applications Observed, Monitoring, History, Measurement Health, Storage, Startup Service, Settings and About & Maintenance. History/exports and configuration are embedded. Every existing action is mapped in `Windows/docs/v05/UI-REVIEW.md`.
 - Silent Meteor Windows theme is a read-only reference: dark blue-gray palette, rounded buttons, native dark title bar and one-second explicit tooltips. No Silent Meteor files are copied or changed.
 - The app-only session index retains all observed identities; the virtual application table preserves scroll and selection. Capture, measurement, history, report, storage and service implementations remain unchanged apart from version provenance.
@@ -23,3 +23,13 @@
 Unsigned preliminary Windows x64 build for user testing. Physical DPI/multi-monitor, real ETW, boot-service and installer lifecycle/upgrade acceptance were not rerun in this UI workflow. Existing behavior is retained, not newly certified. Ubuntu/macOS remain placeholders. No new open-source reuse license is granted.
 
 Public shared memory was reviewed. Status is recorded here within the authorized app scope; unrelated shared files remain unchanged.
+
+## 2026-10-29 — Owner-requested version collection publication
+
+- User explicitly authorized adding v0.5 preliminary to existing release 427955131 and renaming it `Cylon Raider — Windows`, with versions grouped on one page.
+- Publication completed in [run 40917034009](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40917034009). The same release ID and original `cylon-raider-windows-v0.4.0` tag are retained; tag commit remains `3f15a615e9cc1a09692abbdb8d4a183eadccf43e`. Prerelease status remains true.
+- All three original v0.4 assets retain their original IDs, names, sizes, SHA256 hashes and URLs. Their downloaded bytes were verified before and after publication. Six versioned v0.5 assets were added; every downloaded new file was hash-verified.
+- The v0.5 installer is byte-identical to the verified source/build artifact; there was no rebuild or application change. Installer SHA256 remains `03d28df0802e904d8b336d43fafdb3e6d0d83c27d942c895cbd1ab1649ab1fe9`. A separate unauthenticated public installer download also matched.
+- The release body now has v0.5 and v0.4 sections with separate downloads and checksums; original v0.4 notes are preserved. No other application or release was changed. Future authorized Windows versions should be added to this same collection without replacing historical assets.
+- Publisher guards passed 16 synthetic tests, and the receipt is recorded in `Release-Tools/v05/publication-40917034009.json`. The first two publisher attempts stopped before any mutation on API request-format errors; the corrected workflow completed all checks.
+- [Windows version collection](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0) now supplies persistent public downloads; temporary Actions artifacts remain supplementary.
