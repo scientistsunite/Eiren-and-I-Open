@@ -29,6 +29,9 @@ TITLE = "Cylon Raider — Windows"
 SOURCE_SHA = "b82a8d0426a78bbff04608b2a26d9d26273a9765"
 RUN_ID = 40903515615
 RUN_URL = f"https://github.com/{REPOSITORY}/actions/runs/{RUN_ID}"
+VERSION = "0.5.0-preliminary"
+BUILD_WORKFLOW = ".github/workflows/cylon-raider-v05-preliminary.yml"
+PUBLISH_REF = "refs/heads/cylon-raider-v05-release-addition"
 ARTIFACT_ID = 12910193270
 ARTIFACT_NAME = "CylonRaider-0.5.0-preliminary-Windows-x64"
 ARTIFACT_SHA = "0b34789e4669ba9a01304e31825529c6829df0aa70677c50c075b616a74fedea"
@@ -136,7 +139,7 @@ def validate_origin(repository: dict, run: dict, artifact: dict, tag: dict) -> N
     require(repository.get("id") == REPOSITORY_ID and repository.get("full_name") == REPOSITORY, "Unexpected repository identity")
     require(run.get("id") == RUN_ID and run.get("status") == "completed" and run.get("conclusion") == "success", "Pinned build run did not pass")
     require(run.get("head_sha") == SOURCE_SHA and run.get("repository", {}).get("id") == REPOSITORY_ID, "Pinned build source/repository mismatch")
-    require(run.get("event") == "push" and run.get("path") == ".github/workflows/cylon-raider-v05-preliminary.yml", "Unexpected build workflow/event")
+    require(run.get("event") == "push" and run.get("path") == BUILD_WORKFLOW, "Unexpected build workflow/event")
     require(artifact.get("id") == ARTIFACT_ID and artifact.get("name") == ARTIFACT_NAME, "Unexpected artifact identity")
     require(artifact.get("expired") is False and artifact.get("digest") == "sha256:" + ARTIFACT_SHA and artifact.get("size_in_bytes") == ARTIFACT_SIZE, "Artifact unavailable or digest/size changed")
     require(artifact.get("workflow_run", {}).get("id") == RUN_ID and artifact.get("workflow_run", {}).get("head_sha") == SOURCE_SHA, "Artifact/run mismatch")
@@ -155,8 +158,8 @@ def parse_manifest(text: str) -> dict[str, str]:
     return result
 
 
-def prepare_payload(archive: Path, directory: Path, expected_archive_sha: str = ARTIFACT_SHA) -> dict[str, str]:
-    require(sha256(archive) == expected_archive_sha, "Artifact ZIP checksum mismatch")
+def prepare_payload(archive: Path, directory: Path, expected_archive_sha: str | None = None) -> dict[str, str]:
+    require(sha256(archive) == (expected_archive_sha or ARTIFACT_SHA), "Artifact ZIP checksum mismatch")
     directory.mkdir(parents=True, exist_ok=True)
     require(not any(directory.iterdir()), "Prepared directory must be empty")
     with zipfile.ZipFile(archive) as bundle:
@@ -174,7 +177,7 @@ def prepare_payload(archive: Path, directory: Path, expected_archive_sha: str = 
     for name, digest in PINNED_PAYLOADS.items():
         require(manifest[name] == digest, f"Approved payload mismatch: {name}")
     provenance = json.loads((directory / "BUILD-PROVENANCE.json").read_text(encoding="utf-8-sig"))
-    require(provenance.get("source_sha") == SOURCE_SHA and provenance.get("version") == "0.5.0-preliminary" and provenance.get("workflow_run") == RUN_URL, "Build provenance mismatch")
+    require(provenance.get("source_sha") == SOURCE_SHA and provenance.get("version") == VERSION and provenance.get("workflow_run") == RUN_URL, "Build provenance mismatch")
     for old, new in RENAMES.items():
         (directory / old).rename(directory / new)
     (directory / "SHA256SUMS.txt").unlink()
@@ -244,7 +247,7 @@ def verify_download(api: GitHub, asset: dict, digest: str, destination: Path) ->
 
 
 def validate_actor(environment) -> None:
-    expected = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "GITHUB_REPOSITORY": REPOSITORY, "GITHUB_ACTOR": "scientistsunite", "GITHUB_EVENT_NAME": "push", "GITHUB_REF": "refs/heads/cylon-raider-v05-release-addition"}
+    expected = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "GITHUB_REPOSITORY": REPOSITORY, "GITHUB_ACTOR": "scientistsunite", "GITHUB_EVENT_NAME": "push", "GITHUB_REF": PUBLISH_REF}
     require(all(environment.get(key) == value for key, value in expected.items()), "Publication requires the owner push on the scoped branch in a disposable hosted runner")
 
 
@@ -266,7 +269,7 @@ def publish(work: Path, mutate: bool) -> dict:
     release = api.request("GET", f"releases/{RELEASE_ID}")
     inventory = validate_release(release, hashes)
     desired_body = build_body()
-    plan = {"repository": REPOSITORY, "release_id": RELEASE_ID, "tag": TAG, "tag_sha": TAG_SHA, "name": TITLE, "source_sha": SOURCE_SHA, "run_id": RUN_ID, "artifact_id": ARTIFACT_ID, "preserved_assets": {name: identifier for name, (identifier, _, _) in BASELINE.items()}, "new_assets": hashes, "body_sha256": hashlib.sha256(desired_body.encode()).hexdigest(), "mutations": "Append missing matching v0.5 assets; PATCH name/body only"}
+    plan = {"repository": REPOSITORY, "release_id": RELEASE_ID, "tag": TAG, "tag_sha": TAG_SHA, "name": TITLE, "source_sha": SOURCE_SHA, "run_id": RUN_ID, "artifact_id": ARTIFACT_ID, "preserved_assets": {name: identifier for name, (identifier, _, _) in BASELINE.items()}, "new_assets": hashes, "body_sha256": hashlib.sha256(desired_body.encode()).hexdigest(), "mutations": f"Append missing matching {VERSION} assets; PATCH name/body only"}
     (work / "plan.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
     (work / "release-notes.md").write_text(desired_body, encoding="utf-8")
     print(json.dumps(plan, indent=2), flush=True)
