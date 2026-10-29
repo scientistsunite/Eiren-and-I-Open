@@ -59,3 +59,11 @@ Public shared memory was reviewed. Status is recorded here within the authorized
 - Fix: retain the main window's default taskbar style and use Hide/Show directly for tray close, automatic tray startup and restoration. Hidden windows are already excluded from the taskbar. No monitoring, collector, history, storage, report or service behavior changes.
 - New targeted native regression reads user32 IsWindowVisible and compares HWND identity, alongside managed visibility, for normal/maximized/minimized windows on three sections. It also checks one managed top-level form, actual tray left-click restoration and window-state preservation. Existing explicit one-close shutdown remains covered.
 - Post-fix Windows [run 40951110076](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40951110076), source `a201d8b0537b0dc72c35b0b01a262fbacc9dcd58`, passed both the targeted native matrix and the existing unified UI regressions. All nine tray-close cases report managedVisible=false, nativeVisible=false, recreated=false, disposed=false. Tray restoration and maximized-state preservation passed, alongside the existing one-close actual shutdown and all 3,916 unified UX checks. Compilation also passed with zero warnings/errors. No installer, published release or release asset was changed by this investigation.
+
+
+## 2026-10-29 — Owner-authorized v0.5.2 prerelease
+
+- User merged PR #4 and explicitly requested a new v0.5.2 prerelease installer under the existing Cylon Raider — Windows collection.
+- Packaging is based on merged public main `776d6c1`; the tray-close fix is retained unchanged. Only version provenance, versioned build recipes and app documentation change for this build. Capture/history/storage/reports/collector/service implementations are unchanged.
+- The versioned Windows workflow runs all existing deterministic/native suites and the additional 53-check native tray-close probe before self-contained publishing and Inno Setup compilation. Build and publication evidence are pending.
+- Publication must append version-specific files and retain all 15 existing assets and the historical tag. No other application or release is in scope.

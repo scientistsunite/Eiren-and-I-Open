@@ -1,6 +1,6 @@
-# Cylon Raider Windows — v0.5.1 prerelease
+# Cylon Raider Windows — v0.5.2 prerelease
 
-This prerelease update reorganizes the existing Windows application into one application window. It is intended for user testing; physical Windows acceptance remains outstanding.
+This prerelease fixes a window reappearing after close to tray. It includes the merged PR #4 fix and retains the v0.5.1 interface. The interface reorganizes the existing Windows application into one application window. It is intended for user testing; physical Windows acceptance remains outstanding.
 
 Navigation: Dashboard, Live Traffic, Top Applications Observed, Monitoring, History, Measurement Health, Storage, Startup Service, Settings, About & Maintenance.
 
@@ -10,11 +10,11 @@ Navigation: Dashboard, Live Traffic, Top Applications Observed, Monitoring, Hist
 - Buttons use rounded corners and a dark blue-gray theme. The native Windows title bar is dark gray; tooltips appear after one second. High-contrast system colors are respected.
 - Monitoring status stays visible above every section. One Start/Stop button changes with connection state; waiting for measurements is explicit.
 - History provides all six views through a full-width selector. Diagnostic retention explains how 0 uses the traffic-history retention setting.
-- One close request exits when Continue in tray is disabled; a single tray left-click restores the same window.
+- Closing to tray keeps the native window hidden in normal, maximized and minimized states; one close request exits when Continue in tray is disabled; a single tray left-click restores the same window.
 - An explicit Start-menu launch opens the window. Automatic `--startup` launches retain the existing window/tray preferences.
 
 Use the prerelease Windows x64 installer for a normal installation; it retains the existing application ID and preserves data by default. Portable builds use their existing separate portable profile. The installer is unsigned.
 
-Build: `.github/workflows/cylon-raider-v051-prerelease.yml`, Windows hosted runner, .NET SDK 10.0.403, Inno Setup 6, Python 3.13. Run `./packaging/v051/build.ps1` from a clean Windows checkout. Outputs include installer, portable archive, source archive, SHA256 checksums and build provenance. The workflow does not install the application or register a service.
+Build: `.github/workflows/cylon-raider-v052-prerelease.yml`, Windows hosted runner, .NET SDK 10.0.403, Inno Setup 6, Python 3.13. Run `./packaging/v052/build.ps1` from a clean Windows checkout. Outputs include installer, portable archive, source archive, SHA256 checksums and build provenance. The workflow does not install the application or register a service.
 
-See [v0.5.1 changes](docs/v051/CHANGES.md), [UI action mapping and validation](docs/v05/UI-REVIEW.md) and [distribution notices](docs/THIRD-PARTY.md). Application source and artwork remain copyright Eiren & I Apps; no new open-source reuse license is granted.
+See [v0.5.2 changes](docs/v052/CHANGES.md), [UI action mapping and validation](docs/v05/UI-REVIEW.md) and [distribution notices](docs/THIRD-PARTY.md). Application source and artwork remain copyright Eiren & I Apps; no new open-source reuse license is granted.
