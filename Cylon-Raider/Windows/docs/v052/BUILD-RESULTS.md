@@ -16,3 +16,10 @@ Source ZIP SHA256: `f43cbcfc385e4df9003f65fd683210febbaf851f74a18fe961d34b581da8
 The application/build inputs are unchanged from the verified source. This result document and release tooling were added afterward.
 
 Unsigned Windows x64 prerelease. Synthetic hosted checks do not establish physical M7/4K/DPI, multi-monitor, real ETW, boot-service or installer lifecycle/upgrade acceptance. No real collection, installation, service registration or existing user profile was used by the UI fixture. Other app files/releases and Ubuntu/macOS are unchanged.
+
+## Published downloads
+
+- [v0.5.2 prerelease installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.2-prerelease.exe).
+- [Cylon Raider — Windows version collection](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0), including portable/source archives, version-specific checksums and provenance.
+- [Publication run 40953046225](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40953046225) verified every old/new download. [Evidence-note update 40953323784](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40953323784) retained the exact same assets and corrected only the targeted assertion count from the earlier suite's 53 to this run's actual 52.
+- Independent public installer download matched SHA256 above. All 15 prior assets and the historical tag remain unchanged; six files were added. No other app files or releases were changed.
