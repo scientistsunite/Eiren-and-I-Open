@@ -1,11 +1,11 @@
 # Public Test and Platform Matrix
 
-As of 2026-10-29, these are **directory placeholders**, not supported implementations.
+As of 2026-10-29, most directories remain **placeholders**. BCC Windows is experimental **source only**, not certified runtime or hardware support.
 
 | Application | Windows | Ubuntu | macOS |
 | --- | --- | --- | --- |
 | Archive Reader | Placeholder | Placeholder | Placeholder |
-| Battery Charge Control | Placeholder | Placeholder | Placeholder |
+| Battery Charge Control | Experimental source; historical simulation/CI-fixture results only, **public revision not yet verified** | Placeholder | Placeholder |
 | Silent Meteor | Placeholder | Placeholder | Placeholder |
 | System Chronicle | Placeholder | Placeholder | Placeholder |
 | Cylon Raider | Placeholder | Placeholder | Placeholder |
@@ -18,3 +18,7 @@ As of 2026-10-29, these are **directory placeholders**, not supported implementa
 | Scaffold layout | Checks required public placeholder files are present and nonempty | `python3 testing/scripts/verify_structure.py` |
 
 Do not mark app tests or releases passed until there is a documented run against public implementation, with date, commit, platform, and limitations.
+
+## BCC Windows history and next public gate
+
+The [BCC Windows evidence summary](../Battery-Charge-Control/Windows/README.md) records prior synthetic simulation and a separately isolated installer fixture's results. They were **not executed for this public commit**. Run and cite a public-commit-bound workflow before changing this row to public CI verified. Production GUI, firmware, service and physical acceptance remain Not Tested.

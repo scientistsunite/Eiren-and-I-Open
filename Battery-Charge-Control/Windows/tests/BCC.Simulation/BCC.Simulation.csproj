@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Deliberate allowlist: no reference to ANY production assembly or native adapter. -->
+  <ItemGroup>
+    <Compile Include="../../src/BCC.Core/Domain.cs" Link="Shared/Domain.cs" />
+    <Compile Include="../../src/BCC.Core/ChargingOperations.cs" Link="Shared/ChargingOperations.cs" />
+    <Compile Include="../../src/BCC.Core/MonitoringSession.cs" Link="Shared/MonitoringSession.cs" />
+    <Compile Include="../../src/BCC.Core/SafetyDisclosure.cs" Link="Shared/SafetyDisclosure.cs" />
+    <Compile Include="../../src/BCC.Controller.Asus/AsusController.cs" Link="Shared/AsusController.cs" />
+    <Compile Include="../../src/BCC.Core/InstallationMaintenance.cs" Link="Shared/InstallationMaintenance.cs" />
+    <Compile Include="SimulationEnvironment.cs" />
+  </ItemGroup>
+</Project>
