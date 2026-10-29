@@ -252,6 +252,7 @@ internal static class Program
                     var compactApplications = Field<DataGridView>(compactHistory, "applications");
                     Check(compactApplications.Visible && compactApplications.ClientSize.Height >= 80, "At 1000×650, embedded history retains at least 80 pixels of application-list height");
                     Check(compactHistory.Parent != null && compactHistory.Bounds == compactHistory.Parent.ClientRectangle, "At 1000×650, history fills its available panel");
+                    var layoutFailures = new List<Exception>();
                     foreach (float scale in new[] { 1f, 1.25f, 1.5f, 2f })
                     {
                         window.Font = new Font("Segoe UI", 10 * scale);
@@ -288,7 +289,12 @@ internal static class Program
                                 Check(!history.TopLevel && history.Parent?.Name == "HistoryHost", $"{scale:P0}: history is embedded in the unified application window");
                             }
                             Check(Application.OpenForms.Cast<Form>().Where(form => form.TopLevel).SequenceEqual(new[] { window }), $"{scale:P0}: {expected[section]} opens no second application window");
-                            CheckLayout(window, $"Font {scale:P0}, {expected[section]}");
+                            try { CheckLayout(window, $"Font {scale:P0}, {expected[section]}"); }
+                            catch (Exception error)
+                            {
+                                layoutFailures.Add(new InvalidOperationException($"Font {scale:P0}, {expected[section]} layout failed", error));
+                                Console.Error.WriteLine("LAYOUT FAILURE: " + error.Message);
+                            }
                             if (scale is 1f or 2f)
                             {
                                 // Render only this synthetic fixture's controls. Never
@@ -311,6 +317,7 @@ internal static class Program
                     await Task.Delay(30);
                     Check(window.MinimumSize.Width <= area.Width && window.MinimumSize.Height <= area.Height, "After 200% font simulation, the window minimum fits the actual Windows work area");
                     Check(area.Contains(window.Bounds), "After 200% font simulation, work-area fitting keeps all application window bounds on screen");
+                    if (layoutFailures.Count > 0) throw new AggregateException("Unified shell layout regressions failed; all font scales and sections were inspected", layoutFailures);
                 }
                 catch (Exception error) { failure = error; }
                 finally
