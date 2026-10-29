@@ -1,5 +1,7 @@
 # Cylon Raider — Windows
 
+**Intended use:** Observe local per-application network traffic and review history and reports without Cylon Raider initiating its own network communications. Not a firewall or malware verdict.
+
 Windows versions are collected on this page. Each version has its own downloads and checksums; earlier files remain available. The existing release URL and historical v0.4.0 tag are retained.
 
 ## v0.5.1 prerelease — latest addition
@@ -42,16 +44,16 @@ Unsigned preliminary build for user testing. Physical DPI/multi-monitor, real ET
 - [SHA256 checksums](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.4.0-SHA256SUMS.txt)
 
 <details>
-<summary>Original v0.4.0 release notes, preserved verbatim</summary>
+<summary>Historical v0.4.0 release notes (licensing language updated)</summary>
 
 # Cylon Raider — Windows 0.4.0
 
 PRERELEASE: sequential Windows VM validation passed, but physical-machine acceptance testing was still outstanding when this package was selected.
 
 Package source: individually selected release assets, checked locally before public upload.
-SHA-256 checksums are attached. No project-wide open-source license has yet been selected.
+SHA-256 checksums are attached. See the [MIT License](../../LICENSE) for current project-owned Cylon Raider materials. Third-party licenses and historical package notices still apply.
 GitHub's automatically generated Source code archives currently include public repository scaffolding, not this application's implementation.
 
 </details>
 
-GitHub's automatically generated Source code archives follow the historical tag and are not the newer implementations. Use the explicit version-specific source archives above. No new project-wide open-source reuse license is granted.
+GitHub's automatically generated Source code archives follow the historical tag and are not the newer implementations. Use the explicit version-specific source archives above. Current project-owned Cylon Raider material in this public Git tree is available under the [MIT License](../../LICENSE), subject to third-party rights. Historical downloaded packages remain unchanged.

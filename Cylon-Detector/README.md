@@ -1,11 +1,15 @@
 # Cylon Detector
 
-**Public status:** placeholder only. No application source code, installers, binaries, releases, or previous development history have been published here.
+**Intended use (planned):** Review local application and computer signals for unusual patterns, such as unexpected resource use or changes requiring investigation. This is envisioned as a local anomaly-review companion to other observability tools, not a proof of malware or a replacement for security software.
+
+**Public status:** Concept and placeholders only. There is no public Cylon Detector implementation, installer, executable or release.
 
 ## Reserved platforms
 
-- [Windows](Windows/) — placeholder, not a support commitment.
-- [Ubuntu](Ubuntu/) — placeholder, not a support commitment.
-- [macOS](macOS/) — placeholder, not a support commitment.
+- [Windows](Windows/) — placeholder; no working product claimed.
+- [Ubuntu](Ubuntu/) — placeholder; no working product claimed.
+- [macOS](macOS/) — placeholder; no support commitment.
 
-Record approved decisions in [PROJECT_MEMORY.md](PROJECT_MEMORY.md) and use the [shared testing policy](../testing/TEST_POLICY.md). Review source, credentials, dependencies, and licensing before any implementation is added.
+## Licensing and development
+
+Project-owned content added under this directory is [MIT-licensed](LICENSE), subject to outside rights. A license is not evidence of an implementation. Record public decisions in [project memory](PROJECT_MEMORY.md); review data privacy, false positives, privileges and testing before releasing future functionality.
