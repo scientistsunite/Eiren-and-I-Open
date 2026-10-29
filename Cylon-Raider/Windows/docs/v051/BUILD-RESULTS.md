@@ -17,3 +17,9 @@ The final build fixed two packaging-only failures: the source guard now reads UT
 The application, tests, installer recipe and build inputs remain identical to the verified source above; this result document and release tooling were added afterward.
 
 Unsigned Windows x64 prerelease. Physical Samsung M7/4K/display-DPI, multi-monitor, real ETW, boot-service, long-duration and installer lifecycle/upgrade acceptance are not claimed by this workflow. No collection, installation, service registration or existing user profile was used by the UI fixture. Other application files/releases and Ubuntu/macOS are unchanged.
+
+## Public download
+
+- [v0.5.1 prerelease installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.1-prerelease.exe).
+- [Cylon Raider — Windows version collection](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0), with version-specific portable/source archives, checksums and provenance.
+- [Verified collection publication](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40942543004). All nine prior assets and the historical tag are retained; six versioned files were added. Their downloaded bytes were verified, and an independent public installer download matched its build hash. No other application or release was changed.
