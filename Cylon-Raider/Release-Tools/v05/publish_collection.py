@@ -197,6 +197,12 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
         return redirected
 
 
+def api_url(path: str) -> str:
+    if path.startswith("https://uploads.github.com/"):
+        return path
+    return f"https://api.github.com/repos/{REPOSITORY}" + ("/" + path if path else "")
+
+
 class GitHub:
     def __init__(self, token: str):
         require(bool(token), "GH_TOKEN is required")
@@ -204,7 +210,8 @@ class GitHub:
         self.opener = urllib.request.build_opener(SafeRedirect())
 
     def request(self, method: str, path: str, payload=None, upload: Path | None = None):
-        url = path if path.startswith("https://uploads.github.com/") else f"https://api.github.com/repos/{REPOSITORY}/{path}"
+        url = api_url(path)
+        print(f"GitHub {method}: {path or REPOSITORY}", flush=True)
         headers = {"Authorization": "Bearer " + self.token, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "cylon-raider-scoped-collection/0.5"}
         if upload is not None:
             data = upload.read_bytes()
@@ -219,7 +226,8 @@ class GitHub:
     def download(self, path: str, destination: Path) -> None:
         require(not destination.exists(), "Download destination already exists")
         headers = {"Authorization": "Bearer " + self.token, "Accept": "application/octet-stream", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "cylon-raider-scoped-collection/0.5"}
-        url = f"https://api.github.com/repos/{REPOSITORY}/{path}"
+        url = api_url(path)
+        print(f"Verify download: {path}", flush=True)
         with self.opener.open(urllib.request.Request(url, headers=headers), timeout=180) as source, destination.open("xb") as target:
             shutil.copyfileobj(source, target)
 
@@ -229,7 +237,14 @@ def verify_download(api: GitHub, asset: dict, digest: str, destination: Path) ->
     require(destination.stat().st_size == asset.get("size") and sha256(destination) == digest, f"Downloaded asset checksum mismatch: {asset['name']}")
 
 
+def validate_actor(environment) -> None:
+    expected = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "GITHUB_REPOSITORY": REPOSITORY, "GITHUB_ACTOR": "scientistsunite", "GITHUB_EVENT_NAME": "push", "GITHUB_REF": "refs/heads/cylon-raider-v05-release-addition"}
+    require(all(environment.get(key) == value for key, value in expected.items()), "Publication requires the owner push on the scoped branch in a disposable hosted runner")
+
+
 def publish(work: Path, mutate: bool) -> dict:
+    if mutate:
+        validate_actor(os.environ)
     require(not work.exists(), "Use a fresh work directory")
     work.mkdir(parents=True)
     api = GitHub(os.environ.get("GH_TOKEN", ""))

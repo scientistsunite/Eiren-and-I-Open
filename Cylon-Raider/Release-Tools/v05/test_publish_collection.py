@@ -24,6 +24,20 @@ def origin():
 
 
 class ReleaseGuards(unittest.TestCase):
+    def test_repository_root_and_subresource_urls(self):
+        root = "https://api.github.com/repos/" + p.REPOSITORY
+        self.assertEqual(p.api_url(""), root)
+        self.assertEqual(p.api_url("releases/427955131"), root + "/releases/427955131")
+        upload = "https://uploads.github.com/repos/" + p.REPOSITORY + "/releases/427955131/assets?name=versioned.txt"
+        self.assertEqual(p.api_url(upload), upload)
+
+    def test_mutation_actor_is_owner_on_scoped_hosted_branch(self):
+        environment = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "GITHUB_REPOSITORY": p.REPOSITORY, "GITHUB_ACTOR": "scientistsunite", "GITHUB_EVENT_NAME": "push", "GITHUB_REF": "refs/heads/cylon-raider-v05-release-addition"}
+        p.validate_actor(environment)
+        for key in environment:
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                changed = dict(environment); changed[key] = "other"; p.validate_actor(changed)
+
     def test_identity_and_all_original_assets(self):
         inventory = p.validate_release(release())
         self.assertEqual(set(inventory), set(p.BASELINE))
