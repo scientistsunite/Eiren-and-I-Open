@@ -299,7 +299,7 @@ internal static class Program
                             var fullStatus=indicator.RectangleToScreen(indicator.ClientRectangle);
                             for(Control? ancestor=indicator.Parent;ancestor!=null;ancestor=ancestor.Parent)
                                 Check(ancestor.RectangleToScreen(ancestor.ClientRectangle).Contains(fullStatus),$"{scale:P0}: monitoring indicator is fully visible on {expected[section]}");
-                            foreach(var headerLabel in new Control[]{Field<Label>(window,"status"),indicator,Field<Button>(window,"start"),Field<Button>(window,"stopButton")})
+                            foreach(var headerLabel in new Control[]{indicator,Field<Button>(window,"start")})
                             {
                                 var rect=headerLabel.RectangleToScreen(headerLabel.ClientRectangle);
                                 for(Control? ancestor=headerLabel.Parent;ancestor!=null;ancestor=ancestor.Parent)

@@ -77,6 +77,7 @@ sealed class OptionsWindow : Form
         Shown+=(_,_)=>{var area=Screen.FromControl(this).WorkingArea;if(MinimumSize.Width>area.Width||MinimumSize.Height>area.Height)MinimumSize=new(Math.Min(MinimumSize.Width,area.Width),Math.Min(MinimumSize.Height,area.Height));if(Width>area.Width||Height>area.Height)Bounds=new(area.X,area.Y,Math.Min(Width,area.Width),Math.Min(Height,area.Height));QueueValidation();};
         ApplyTheme(this);AppTheme.Apply(this);saved=Snapshot();loading=false;navigation.SelectedIndex=0;QueueValidation();
     }
+    internal void AddExitAction(Action exit){var page=(TableLayoutPanel)pages[6].Controls[0];Add(page,AppTheme.Button("Exit Cylon Raider",exit));}
     internal void EmbedInShell(Action<int> navigate)
     {
         embedded=true;shellNavigation=navigate;TopLevel=false;FormBorderStyle=FormBorderStyle.None;

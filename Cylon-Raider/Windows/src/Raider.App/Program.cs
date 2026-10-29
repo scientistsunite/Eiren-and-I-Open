@@ -48,7 +48,7 @@ sealed partial class MainWindow : Form
         BackColor=Color.FromArgb(22,25,31);ForeColor=Color.Gainsboro;table.BackColor=Color.FromArgb(29,33,41);table.ForeColor=ForeColor;table.Font=new("Segoe UI",10);
         AutoScaleMode=AutoScaleMode.Font;Font=new("Segoe UI",10);
         StartupEvidence.Mark("shell construction begin");BuildShell();StartupEvidence.Mark("shell construction complete");
-        start.Click+=async(_,_)=>await StartMonitoring();stopButton.Click+=async(_,_)=>await PauseMonitoring();sort.SelectedIndexChanged+=(_,_)=>Render();
+        start.Click+=async(_,_)=>{if(starting||pipe!=null)await PauseMonitoring();else await StartMonitoring();};stopButton.Click+=async(_,_)=>await PauseMonitoring();sort.SelectedIndexChanged+=(_,_)=>Render();
         var menu=new ContextMenuStrip();menu.Items.Add("Open Cylon Raider",null,(_,_)=>Restore());trayMonitoring=new ToolStripMenuItem("Start Monitoring");trayMonitoring.Click+=async(_,_)=>{if(pipe==null)await StartMonitoring();else await PauseMonitoring();};menu.Items.Add(trayMonitoring);menu.Items.Add("View Logs",null,(_,_)=>ShowHistory());menu.Items.Add("Options",null,(_,_)=>ShowOptions());menu.Items.Add("Exit",null,async(_,_)=>await ExitApp());
         tray=new NotifyIcon{Icon=Icon,Text="Cylon Raider — stopped",Visible=true,ContextMenuStrip=menu};tray.MouseClick+=(_,e)=>{if(e.Button==MouseButtons.Left)Restore();};
         FormClosing+=(_,e)=>{if(exiting)return;e.Cancel=true;if(preferences.ContinueInTray){Hide();ShowInTaskbar=false;}else BeginInvoke((Action)(()=>_=ExitApp()));};
@@ -107,6 +107,7 @@ sealed partial class MainWindow : Form
     {
         if(optionsWindow==null||optionsWindow.IsDisposed){
             optionsWindow=new OptionsWindow(preferences,ApplyOptions,()=>status.Text+"\n"+logging.Text,()=>StartMonitoring(),PauseMonitoring,RestartMonitoring,ShowHistory,ClearHistory,RetryLogging,Uninstall,ex=>{storageError="Options operation failed: "+ex.Message;if(!IsDisposed&&!Disposing)logging.Text=storageError;},Restore);
+            optionsWindow.AddExitAction(()=>_=ExitApp());
             optionsWindow.EmbedInShell(index=>navigation.SelectedIndex=index switch{1=>3,2=>4,3=>6,4=>7,5=>8,6=>9,_=>0});
         }
         var viewport=sections[navigation.SelectedIndex];
@@ -280,7 +281,8 @@ sealed partial class MainWindow : Form
         string state=exiting?"◌ CLOSING — saving and stopping preview":starting?"◌ MONITORING WAITING — connecting":pipe!=null&&!stale&&!unavailable?"● MONITORING ON — receiving measurements":pipe!=null?"◌ MONITORING WAITING — no fresh measurements":boot!=null?"◌ PREVIEW OFF — check background service in Monitoring":"○ MONITORING OFF — no desktop capture";
         monitoringIndicator.Text=state;monitoringIndicator.AccessibleDescription=state;
         monitoringIndicator.ForeColor=SystemInformation.HighContrast?SystemColors.ControlText:state.Contains("MONITORING ON")?AppTheme.Good:state.Contains("MONITORING OFF")?Color.FromArgb(239,157,157):AppTheme.Warning;
-        start.Enabled=!starting&&pipe==null&&!exiting;stopButton.Enabled=(starting||pipe!=null)&&!exiting;
+        start.Text=starting||pipe!=null?"Stop monitoring":"Start monitoring";start.AccessibleDescription=starting||pipe!=null?"Stop monitoring. Missing intervals will remain unobserved; recorded history is preserved.":"Start monitoring. An administrator permission prompt may appear.";
+        start.Enabled=!exiting;stopButton.Enabled=(starting||pipe!=null)&&!exiting;
     }
     void Render()=>RenderModern();
     static string Rate(long bytes)=>$"{bytes/1024d:F1} KiB/s";

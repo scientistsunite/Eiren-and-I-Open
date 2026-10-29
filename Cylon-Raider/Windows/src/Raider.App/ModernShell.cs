@@ -22,21 +22,24 @@ sealed partial class MainWindow
         root.Controls.Add(navigation,0,0);root.SetRowSpan(navigation,2);AppTheme.FitNavigation(root,navigation);
         var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,RowCount=0,Padding=new(20,8,20,4)};header.ColumnStyles.Add(new(SizeType.Percent,100));
         var actions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};
-        actions.Controls.AddRange([start,stopButton,AppTheme.Button("Exit Cylon Raider",()=>_=ExitApp())]);
-        AppTheme.WrapLabels(header);AppTheme.Add(header,monitoringIndicator);AppTheme.Add(header,actions);AppTheme.Add(header,status);
+        stopButton.Visible=false;actions.Controls.Add(start);
+        AppTheme.WrapLabels(header);AppTheme.Add(header,monitoringIndicator);AppTheme.Add(header,actions);
         foreach(var label in new[]{status,logging}){label.Dock=DockStyle.Top;label.Margin=new(0,2,0,2);}
         root.Controls.Add(header,1,0);root.Controls.Add(pageHost,1,1);Controls.Add(root);
         TableLayoutPanel Page(string title){var viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Visible=false};var body=AppTheme.Page(title);viewport.Controls.Add(body);pageHost.Controls.Add(viewport);sections.Add(viewport);return body;}
         Panel SpaciousPage(string title,Control list,params Control[] tools){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false,Padding=new(20,8,20,12)};
             var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};layout.ColumnStyles.Add(new(SizeType.Percent,100));
-            layout.RowStyles.Add(new(SizeType.AutoSize));layout.RowStyles.Add(new(SizeType.AutoSize));layout.RowStyles.Add(new(SizeType.Percent,100));
+            layout.RowStyles.Add(new(SizeType.AutoSize));layout.RowStyles.Add(new(SizeType.Absolute,100));layout.RowStyles.Add(new(SizeType.Percent,100));
             layout.Controls.Add(AppTheme.Label(title,true),0,0);
             var toolBody=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};toolBody.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(toolBody);
-            foreach(var tool in tools)AppTheme.Add(toolBody,tool);layout.Controls.Add(toolBody,0,1);
+            var toolViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};
+            foreach(var tool in tools)AppTheme.Add(toolBody,tool);toolViewport.Controls.Add(toolBody);layout.Controls.Add(toolViewport,0,1);
+            bool fitting=false;void FitTools(){if(fitting)return;fitting=true;try{float desired=toolBody.GetPreferredSize(new(Math.Max(1,toolViewport.ClientSize.Width),0)).Height;float height=Math.Min(desired,Math.Max(48,viewport.ClientSize.Height*.55f));if(Math.Abs(layout.RowStyles[1].Height-height)>.5)layout.RowStyles[1].Height=height;}finally{fitting=false;}}
+            viewport.SizeChanged+=(_,_)=>FitTools();toolBody.SizeChanged+=(_,_)=>FitTools();
             list.Dock=DockStyle.Fill;layout.Controls.Add(list,0,2);viewport.Controls.Add(layout);pageHost.Controls.Add(viewport);sections.Add(viewport);return viewport;}
         void SettingsPage(){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false};pageHost.Controls.Add(viewport);sections.Add(viewport);}
         var dashboard=Page("Dashboard");totals.Font=new("Segoe UI",25,FontStyle.Bold);totals.Dock=DockStyle.Top;totals.Margin=new(0,8,0,14);
-        AppTheme.Add(dashboard,totals);AppTheme.Add(dashboard,overview);AppTheme.Add(dashboard,sessionSummary);AppTheme.Add(dashboard,chart);
+        AppTheme.Add(dashboard,status);AppTheme.Add(dashboard,totals);AppTheme.Add(dashboard,overview);AppTheme.Add(dashboard,sessionSummary);AppTheme.Add(dashboard,chart);
         AppTheme.Add(dashboard,AppTheme.Button("View all applications observed this session",()=>navigation.SelectedIndex=2));
         AppTheme.Add(dashboard,logging);AppTheme.Add(dashboard,storageSummary);AppTheme.Add(dashboard,AppTheme.Label("Recent integrity evidence"));AppTheme.Add(dashboard,recentAlerts);
         AppTheme.Add(dashboard,AppTheme.Button("Inspect Measurement Health",()=>navigation.SelectedIndex=5));
