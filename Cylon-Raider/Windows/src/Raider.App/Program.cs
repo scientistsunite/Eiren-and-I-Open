@@ -24,6 +24,7 @@ sealed partial class MainWindow : Form
 {
     readonly Label totals=new(){AutoSize=true,Text="Download: unavailable    Upload: unavailable"};
     readonly Label status=new(){AutoSize=true,Text="Stopped — only the collector or boot configuration requests elevation."};
+    readonly Label monitoringIndicator=new(){AutoSize=true,Dock=DockStyle.Top,Font=new("Segoe UI",13,FontStyle.Bold),Text="● MONITORING OFF",AccessibleName="Monitoring status",Margin=new(0,4,0,6)};
     readonly Label logging=new(){AutoSize=true,Text="Opening local history"};
     readonly TrafficTable table=new();
     readonly ComboBox sort=new(){DropDownStyle=ComboBoxStyle.DropDownList,Width=180};
@@ -49,9 +50,10 @@ sealed partial class MainWindow : Form
         StartupEvidence.Mark("shell construction begin");BuildShell();StartupEvidence.Mark("shell construction complete");
         start.Click+=async(_,_)=>await StartMonitoring();stopButton.Click+=async(_,_)=>await PauseMonitoring();sort.SelectedIndexChanged+=(_,_)=>Render();
         var menu=new ContextMenuStrip();menu.Items.Add("Open Cylon Raider",null,(_,_)=>Restore());trayMonitoring=new ToolStripMenuItem("Start Monitoring");trayMonitoring.Click+=async(_,_)=>{if(pipe==null)await StartMonitoring();else await PauseMonitoring();};menu.Items.Add(trayMonitoring);menu.Items.Add("View Logs",null,(_,_)=>ShowHistory());menu.Items.Add("Options",null,(_,_)=>ShowOptions());menu.Items.Add("Exit",null,async(_,_)=>await ExitApp());
-        tray=new NotifyIcon{Icon=Icon,Text="Cylon Raider — stopped",Visible=true,ContextMenuStrip=menu};tray.DoubleClick+=(_,_)=>Restore();
-        FormClosing+=(_,e)=>{if(exiting)return;e.Cancel=true;if(preferences.ContinueInTray){Hide();ShowInTaskbar=false;}else _=ExitApp();};
+        tray=new NotifyIcon{Icon=Icon,Text="Cylon Raider — stopped",Visible=true,ContextMenuStrip=menu};tray.MouseClick+=(_,e)=>{if(e.Button==MouseButtons.Left)Restore();};
+        FormClosing+=(_,e)=>{if(exiting)return;e.Cancel=true;if(preferences.ContinueInTray){Hide();ShowInTaskbar=false;}else BeginInvoke((Action)(()=>_=ExitApp()));};
         health.Tick+=(_,_)=>{
+            UpdateMonitoringIndicator();
             logging.Text=(boot!=null?servicePersistence+" | "+serviceReports:writer?.Status+" | "+reports?.Status)+(storageError==null?"":" | "+storageError)+(settings.Warning==null?"":" | "+settings.Warning);
             if((writer?.Healthy==false||servicePersistence.StartsWith("NOT LOGGING",StringComparison.Ordinal))&&!loggingWarningShown){loggingWarningShown=true;tray.Text="Cylon Raider — NOT LOGGING";string error=writer?.Status??servicePersistence;tray.ShowBalloonTip(5000,"Cylon Raider is not logging",error.Length>200?error[..200]:error,ToolTipIcon.Warning);}
             if(Visible&&WindowState!=FormWindowState.Minimized){Render();optionsWindow?.RefreshMonitoring();}
@@ -98,7 +100,7 @@ sealed partial class MainWindow : Form
     }
     void ClockChanged(object? sender,EventArgs args){TimeZoneInfo.ClearCachedData();writer?.State(HistoryState.ClockChange,"System clock/timezone change; no missing coverage is fabricated");}
     protected override void WndProc(ref Message message){if(message.Msg==PlatformPaths.RestoreMessage){Restore();return;}if(message.Msg==PlatformPaths.ShutdownMessage){_=ExitApp();return;}base.WndProc(ref message);}
-    void Restore(){ShowInTaskbar=true;Show();Render();if(WindowState==FormWindowState.Minimized)WindowState=FormWindowState.Normal;Activate();}
+    void Restore(){if(exiting||IsDisposed||Disposing)return;ShowInTaskbar=true;Show();Render();if(WindowState==FormWindowState.Minimized)WindowState=FormWindowState.Normal;Activate();}
     void ShowHistory(){Restore();navigation.SelectedIndex=4;OpenHistoryWindow();}
     void ShowOptions(){Restore();navigation.SelectedIndex=8;}
     void EnsureOptions(int section)
@@ -205,7 +207,7 @@ sealed partial class MainWindow : Form
     }
     async Task StartMonitoring(bool explicitRequest=true)
     {
-        if(pipe!=null||starting||exiting||(configurationBusy&&explicitRequest))return;StartupEvidence.Mark("monitoring request begin",writer?.Status);starting=true;start.Enabled=false;stopButton.Enabled=true;Interlocked.Exchange(ref lastFrame,0);
+        if(pipe!=null||starting||exiting||(configurationBusy&&explicitRequest))return;StartupEvidence.Mark("monitoring request begin",writer?.Status);starting=true;UpdateMonitoringIndicator();start.Enabled=false;stopButton.Enabled=true;Interlocked.Exchange(ref lastFrame,0);
         if(explicitRequest){ledger.Reset();sessionApplications.Reset();connectedClock.Reset();rendered=null;}
         var tokenSource=cancel=new();var token=tokenSource.Token;PipeStream? channel=null;bool handedOff=false;
         try{
@@ -225,7 +227,7 @@ sealed partial class MainWindow : Form
             StartupEvidence.Mark("collector handshake complete",writer?.Status);connectedClock.Start();trayMonitoring.Text="Pause Monitoring";tray.Text="Cylon Raider — monitoring";var destination=writer;
             handedOff=true;previewReader=ReadPreview(channel,service,destination,token);
         }catch(OperationCanceledException){}catch(Exception ex){StartupEvidence.Mark("collector startup failed",ex.GetType().Name+": "+ex.Message);if(!IsDisposed){status.Text="Unavailable: "+ex.Message;writer?.State(HistoryState.Interrupted,"Collector unavailable: "+ex.Message);}}
-        finally{starting=false;if(!handedOff)FinishPreview(channel);}
+        finally{starting=false;if(!handedOff)FinishPreview(channel);UpdateMonitoringIndicator();}
     }
     async Task ReadPreview(PipeStream channel,bool service,HistoryWriter? destination,CancellationToken token)
     {
@@ -249,7 +251,7 @@ sealed partial class MainWindow : Form
         if(!ReferenceEquals(pipe,channel))return;
         channel?.Dispose();pipe=null;latest=null;
         if(IsDisposed||Disposing)return;
-        totals.Text="Download: unavailable    Upload: unavailable";table.Clear();start.Enabled=true;stopButton.Enabled=false;tray.Text="Cylon Raider — preview stopped";trayMonitoring.Text="Start Monitoring";
+        totals.Text="Download: unavailable    Upload: unavailable";table.Clear();start.Enabled=true;stopButton.Enabled=false;tray.Text="Cylon Raider — preview stopped";trayMonitoring.Text="Start Monitoring";UpdateMonitoringIndicator();
     }
     async Task DisconnectPreview()
     {
@@ -265,18 +267,28 @@ sealed partial class MainWindow : Form
             }finally{stoppingPreview=null;}
         }
         if(channel!=null&&boot==null)writer?.State(HistoryState.Paused,drained?"Monitoring paused; known pending ETW bytes retained with unavailable tail coverage":"Monitoring paused; undelivered tail remains unavailable");
-        cancel?.Cancel();pipe?.Dispose();pipe=null;cancel?.Dispose();cancel=null;latest=null;table.Clear();start.Enabled=true;stopButton.Enabled=false;status.Text=boot==null?"Paused — no current measurement":"Live preview disconnected; independent boot collection continues";totals.Text="Download: unavailable    Upload: unavailable";trayMonitoring.Text="Start Monitoring";
+        cancel?.Cancel();pipe?.Dispose();pipe=null;cancel?.Dispose();cancel=null;latest=null;table.Clear();start.Enabled=true;stopButton.Enabled=false;status.Text=boot==null?"Paused — no current measurement":"Live preview disconnected; independent boot collection continues";totals.Text="Download: unavailable    Upload: unavailable";trayMonitoring.Text="Start Monitoring";UpdateMonitoringIndicator();
     }
     Task PauseMonitoring()=>MutateConfiguration(PauseMonitoringCore);
     async Task PauseMonitoringCore(){await DisconnectPreview();if(NativeService.ProcessId()!=null)try{await Admin("/stop");status.Text="Boot service paused; automatic collection resumes at the next Windows boot unless disabled in Options";}catch(Exception ex){Failure("Boot service was not stopped",ex);}}
     async Task RestartMonitoring(){await PauseMonitoring();await StartMonitoring();}
+    void UpdateMonitoringIndicator()
+    {
+        if(IsDisposed||Disposing)return;
+        bool stale=Interlocked.Read(ref lastFrame)==0||Stopwatch.GetElapsedTime(Interlocked.Read(ref lastFrame))>TimeSpan.FromSeconds(6);
+        bool unavailable=boot!=null&&(serviceCapture.StartsWith("Capture unavailable",StringComparison.Ordinal)||serviceCapture.StartsWith("Collector interruption",StringComparison.Ordinal));
+        string state=exiting?"◌ CLOSING — saving and stopping preview":starting?"◌ MONITORING WAITING — connecting":pipe!=null&&!stale&&!unavailable?"● MONITORING ON — receiving measurements":pipe!=null?"◌ MONITORING WAITING — no fresh measurements":boot!=null?"◌ PREVIEW OFF — check background service in Monitoring":"○ MONITORING OFF — no desktop capture";
+        monitoringIndicator.Text=state;monitoringIndicator.AccessibleDescription=state;
+        monitoringIndicator.ForeColor=SystemInformation.HighContrast?SystemColors.ControlText:state.Contains("MONITORING ON")?AppTheme.Good:state.Contains("MONITORING OFF")?AppTheme.Text:AppTheme.Warning;
+        start.Enabled=!starting&&pipe==null&&!exiting;stopButton.Enabled=(starting||pipe!=null)&&!exiting;
+    }
     void Render()=>RenderModern();
     static string Rate(long bytes)=>$"{bytes/1024d:F1} KiB/s";
     async Task ExitApp()
     {
-        if(exiting)return;exiting=true;await configurationGate.WaitAsync();configurationGate.Release();HistoryWindow.ApplicationClosing(true);await DisconnectPreview();health.Stop();var bounds=WindowState==FormWindowState.Normal?Bounds:RestoreBounds;
+        if(exiting)return;exiting=true;UpdateMonitoringIndicator();await configurationGate.WaitAsync();configurationGate.Release();HistoryWindow.ApplicationClosing(true);await DisconnectPreview();health.Stop();var bounds=WindowState==FormWindowState.Normal?Bounds:RestoreBounds;
         try{settings.Save(preferences with{Width=bounds.Width,Height=bounds.Height});}catch(Exception ex){logging.Text="Preferences not saved: "+ex.Message;}
         try{await Task.WhenAll(Application.OpenForms.OfType<HistoryWindow>().Select(window=>window.ActiveExport)).WaitAsync(TimeSpan.FromSeconds(30));await ClosePersonalStorage();}catch(Exception ex){exiting=false;HistoryWindow.ApplicationClosing(false);Failure("Exit is waiting for collector/history/CSV shutdown; retry Exit",ex);health.Start();return;}
-        Microsoft.Win32.SystemEvents.TimeChanged-=ClockChanged;foreach(Form form in Application.OpenForms.Cast<Form>().ToArray())if(!ReferenceEquals(form,this))form.Close();tray.Visible=false;tray.Dispose();health.Dispose();Close();
+        Microsoft.Win32.SystemEvents.TimeChanged-=ClockChanged;optionsWindow?.Dispose();historyWindow?.Dispose();tray.Visible=false;tray.Dispose();health.Dispose();Close();
     }
 }

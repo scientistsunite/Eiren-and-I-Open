@@ -27,6 +27,8 @@ internal static class Program
             Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            using(var chart=new TrafficChart{Size=new Size(1000,320),Font=new Font("Segoe UI",20)})
+                Check(chart.PlotBounds().Bottom < chart.Height-chart.Font.Height-8, "Chart plot ends above the scale caption at large fonts");
             IndexRegressions();
             GridRegressions();
             DiscardDraftRegressions();
@@ -243,6 +245,11 @@ internal static class Program
                     var nav = Field<ListBox>(window, "navigation");
                     string[] expected = ["Dashboard", "Live Traffic", "Top Applications Observed", "Monitoring", "History", "Measurement Health", "Storage", "Startup Service", "Settings", "About & Maintenance"];
                     Check(nav.Items.Cast<object>().Select(item => item.ToString()).SequenceEqual(expected), "Unified navigation has the ten requested sections in the requested order");
+                    var indicator=Field<Label>(window,"monitoringIndicator");
+                    Check(indicator.Visible&&indicator.Text.Contains("MONITORING OFF"),"Stopped monitoring has an explicit visible OFF indicator");
+                    var restore=typeof(MainWindow).GetMethod("Restore",BindingFlags.Instance|BindingFlags.NonPublic)!;
+                    window.Hide();restore.Invoke(window,null);
+                    Check(window.Visible&&window.ShowInTaskbar,"Tray restore opens the same main window");
                     var sections = Field<List<Panel>>(window, "sections");
                     window.ClientSize = new(1000, 650);
                     FitFixtureWindow(window);
@@ -277,6 +284,15 @@ internal static class Program
                             var shellRoot = window.Controls[0];
                             var pageHost = Field<Panel>(window, "pageHost");
                             string dimensions = $"window={window.Bounds}, client={window.ClientSize}, shellRoot={shellRoot.Bounds}/{shellRoot.ClientSize}, pageHost={pageHost.Bounds}/{pageHost.ClientSize}, section={sections[section].Bounds}/{sections[section].ClientSize}, workingArea={Screen.FromControl(window).WorkingArea}";
+                            var fullStatus=indicator.RectangleToScreen(indicator.ClientRectangle);
+                            for(Control? ancestor=indicator.Parent;ancestor!=null;ancestor=ancestor.Parent)
+                                Check(ancestor.RectangleToScreen(ancestor.ClientRectangle).Contains(fullStatus),$"{scale:P0}: monitoring indicator is fully visible on {expected[section]}");
+                            foreach(var headerLabel in new[]{Field<Label>(window,"status"),indicator})
+                            {
+                                var rect=headerLabel.RectangleToScreen(headerLabel.ClientRectangle);
+                                for(Control? ancestor=headerLabel.Parent;ancestor!=null;ancestor=ancestor.Parent)
+                                    Check(ancestor.RectangleToScreen(ancestor.ClientRectangle).Contains(rect),$"{scale:P0}: header status is not clipped by any ancestor on {expected[section]}");
+                            }
                             Check(Screen.FromControl(window).WorkingArea.Contains(window.Bounds), $"{scale:P0}: fitted application window remains inside the actual work area; {dimensions}");
                             Check(shellRoot.ClientSize.Width <= window.ClientSize.Width && shellRoot.ClientSize.Height <= window.ClientSize.Height, $"{scale:P0}: shell layout uses the actual fitted client area; {dimensions}");
                             Check(pageHost.ClientRectangle.Contains(sections[section].Bounds), $"{scale:P0}: selected section fits its actual page host; {dimensions}");
@@ -324,8 +340,9 @@ internal static class Program
                 {
                     try
                     {
-                        var exit = typeof(MainWindow).GetMethod("ExitApp", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new MissingMethodException("ExitApp");
-                        await ((Task)(exit.Invoke(window, null) ?? throw new InvalidOperationException("No exit task")));
+                        window.Close();
+                        for(int attempt=0;attempt<200&&!window.IsDisposed;attempt++)await Task.Delay(25);
+                        Check(window.IsDisposed,"One close request completes shutdown without reopening an application window");
                         if (!window.IsDisposed)
                         {
                             failure ??= new InvalidOperationException("Orderly application exit did not close the fixture window");

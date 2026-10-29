@@ -33,3 +33,11 @@ Public shared memory was reviewed. Status is recorded here within the authorized
 - The release body now has v0.5 and v0.4 sections with separate downloads and checksums; original v0.4 notes are preserved. No other application or release was changed. Future authorized Windows versions should be added to this same collection without replacing historical assets.
 - Publisher guards passed 16 synthetic tests, and the receipt is recorded in `Release-Tools/v05/publication-40917034009.json`. The first two publisher attempts stopped before any mutation on API request-format errors; the corrected workflow completed all checks.
 - [Windows version collection](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0) now supplies persistent public downloads; temporary Actions artifacts remain supplementary.
+
+## 2026-10-29 — Windows v0.5.1 prerelease preparation
+
+- Owner requested fixes after display testing: clipped header, chart caption overlap, ambiguous retention wording and monitoring state, repeated close, and tray left-click restoration.
+- Header uses measured automatic rows rather than a capped scrolling viewport. A persistent icon/text indicator distinguishes receiving measurements, stopped desktop capture, waiting, and disconnected boot preview; it does not equate missing data with zero traffic. Duplicate embedded Start/Pause buttons are hidden; restart remains available. Live process details can be expanded, leaving filters and lists room.
+- Chart reserves font-dependent space for its scale caption. Retention text explains 0 using the history setting (normally 15 recorded days, or indefinite).
+- Window-close initiates asynchronous exit after the initial closing event returns; restore ignores shutdown and embedded forms are disposed during exit. Single tray left-click restores the existing window. Continue-in-tray preference is retained.
+- Runtime compilation passed on Linux with Windows targeting, zero warnings/errors. Native Windows regression/build evidence is pending. The original measurement/history/service implementations are unchanged; no other app files are edited.
