@@ -46,7 +46,7 @@ sealed partial class MainWindow
         AppTheme.Add(dashboard,AppTheme.Button("Inspect Measurement Health",()=>navigation.SelectedIndex=5));
         AppTheme.Add(dashboard,AppTheme.Label("Alt+Home: Dashboard · Ctrl+1…9: sections · Ctrl+0: About & Maintenance. Select a section with the mouse or arrow keys."));
         var liveControls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};sort.AccessibleName="Current traffic sort order";sort.AccessibleDescription="Immediately sort visible live traffic by combined, download or upload rate. Recording is unaffected.";sort.Items.AddRange(["Combined observed rate","Download rate","Upload rate"]);sort.SelectedIndex=0;
-        liveControls.Controls.AddRange([filter,sort,grouping]);
+        liveControls.Controls.AddRange([AppTheme.Input(filter),AppTheme.Input(sort),grouping]);
         var detailsPanel=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};detailsPanel.Controls.Add(AppTheme.Button("Refresh selected process details",()=>{inspectedProcess=null;_=InspectProcess(selectedProcess);}));
         SpaciousPage("Live Traffic",table,liveControls,liveNotice,processDetails,detailsPanel);
         filter.TextChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);grouping.CheckedChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);sort.SelectedIndexChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);table.ProcessSelected+=p=>_=InspectProcess(p);
