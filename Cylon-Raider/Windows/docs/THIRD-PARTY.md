@@ -1,8 +1,7 @@
 # Distribution notices
 
-Cylon Raider application source and artwork: copyright Eiren & I Apps; all rights reserved.
-This public preliminary distribution grants no new open-source reuse license. Official artwork is
-owner-supplied and is preserved as the original source asset; no substitute is generated.
+Cylon Raider project-owned source and original artwork: copyright 2026 Eiren & I Apps / scientistsunite, offered under the MIT License in `../../LICENSE`, subject to any third-party rights.
+The official artwork was supplied by the project owner and is preserved as the original source asset. The MIT grant covers only material for which the project has the necessary rights. It does not override third-party rights or rewrite earlier release package contents.
 
 .NET runtime / Windows Forms and Microsoft.Data.Sqlite: Microsoft, MIT license;
 https://github.com/dotnet/runtime/blob/main/LICENSE.TXT and
