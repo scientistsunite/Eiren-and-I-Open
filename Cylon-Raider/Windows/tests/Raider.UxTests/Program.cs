@@ -317,6 +317,15 @@ internal static class Program
                             {
                                 var history = Field<HistoryWindow>(window, "historyWindow");
                                 Check(Field<DataGridView>(history, "applications").ClientSize.Height >= 80, $"{scale:P0}: History retains at least 80px of list viewport at actual fitted dimensions");
+                                var selector=Descendants(history).OfType<ComboBox>().Single(control=>control.AccessibleName=="History view");
+                                Check(selector.Items.Count==6,$"{scale:P0}: all six original history views remain available");
+                                for(int view=0;view<selector.Items.Count;view++)
+                                {
+                                    selector.SelectedIndex=view;await Task.Delay(10);
+                                    var grid=Descendants(history).OfType<DataGridView>().Single(control=>control.Visible);
+                                    Check(grid.Height>=80,$"{scale:P0}: history view {selector.Items[view]} retains at least 80px of list height");
+                                }
+                                selector.SelectedIndex=0;
                                 Check(!history.TopLevel && history.Parent?.Name == "HistoryHost", $"{scale:P0}: history is embedded in the unified application window");
                             }
                             Check(Application.OpenForms.Cast<Form>().Where(form => form.TopLevel).SequenceEqual(new[] { window }), $"{scale:P0}: {expected[section]} opens no second application window");

@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: cylon-raider-v051-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   windows:
@@ -43,7 +43,7 @@ jobs:
         run: |
           # These images are rendered from the isolated synthetic application only.
           # Text evidence permits reviewing selected previews without a desktop session.
-          foreach ($Name in @('font-100-00-dashboard.png', 'font-100-04-history.png', 'font-100-06-storage.png', 'font-200-08-settings.png')) {
+          foreach ($Name in @('font-100-00-dashboard.png', 'font-100-01-live-traffic.png', 'font-100-04-history.png', 'font-100-06-storage.png', 'font-200-00-dashboard.png', 'font-200-04-history.png', 'font-200-08-settings.png')) {
             $Preview = Join-Path 'ui-previews' $Name
             if (Test-Path $Preview) { Write-Output ("RAIDER_PREVIEW " + $Name + " " + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $Preview)))) }
           }
