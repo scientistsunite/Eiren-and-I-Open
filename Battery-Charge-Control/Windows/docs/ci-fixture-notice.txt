@@ -1,0 +1,11 @@
+CI NO-FIRMWARE SIMULATION FIXTURE — NOT THE PRODUCTION APPLICATION
+
+Only the separately reviewed, commit-approved GitHub-hosted runner workflow may
+install this fixture. It copies a synthetic-only preview, shortcuts and a per-user
+Installed apps entry. It never launches the preview or installs a controller,
+driver, service or production executable. It cannot establish production installer
+correctness, physical charging compatibility, or x64 Windows 11 behavior from ARM64.
+
+The existing MonitoringOnly.iss disposable Windows 11 VM procedure is separate
+and still requires its independent review, snapshot and no-passthrough safeguards.
+Do not use this CI fixture as a bypass for that procedure or production testing.

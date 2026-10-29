@@ -2,14 +2,14 @@
 
 Public home for Eiren & I software projects.
 
-> **Status:** repository scaffolding only. No application source, installers, binaries, or private Git history have been imported. Platform folders are placeholders, not claims of product support.
+> **Status:** public scaffold plus a source-only, experimental Battery Charge Control Windows preview. No private Git history, production executable, or approved hardware charging release has been imported. Other platform folders remain placeholders.
 
 ## Applications
 
 | Application | Directory | Status |
 | --- | --- | --- |
 | Archive Reader | [Archive-Reader](Archive-Reader/) | Placeholder |
-| Battery Charge Control | [Battery-Charge-Control](Battery-Charge-Control/) | Placeholder |
+| Battery Charge Control | [Battery-Charge-Control](Battery-Charge-Control/) | Experimental Windows source; Ubuntu/macOS placeholders |
 | Silent Meteor | [Silent-Meteor](Silent-Meteor/) | Placeholder |
 | System Chronicle | [System-Chronicle](System-Chronicle/) | Placeholder |
 | Cylon Raider | [Cylon-Raider](Cylon-Raider/) | Placeholder |
@@ -29,4 +29,4 @@ Each application has a public `PROJECT_MEMORY.md` and reserved Windows, Ubuntu, 
 
 All branches, pull requests, workflows, and artifacts in this public repository should be treated as public. Do not transfer private repository files, histories, logs, credentials, or other unapproved materials here. Only add specifically approved, publication-reviewed content.
 
-**No open-source license has yet been chosen.** Public visibility alone does not grant others permission to reuse or redistribute code. Licensing must be decided before publishing application implementations.
+**Licensing is per component.** See [Battery Charge Control Windows license](Battery-Charge-Control/Windows/LICENSE) for that experimental source; no license is implied for the other placeholder applications. Public visibility alone does not otherwise grant reuse rights.

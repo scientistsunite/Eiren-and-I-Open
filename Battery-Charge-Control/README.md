@@ -1,11 +1,7 @@
 # Battery Charge Control
 
-**Public status:** placeholder only. No application source code, installers, binaries, releases, or previous development history have been published here.
+**Windows:** [v0.1 experimental Windows source preview](Windows/README.md). This is a source-only prerelease, not a verified charging-control product. Historical simulation/CI fixture evidence is described in that README; public source revision testing must be reported separately.
 
-## Reserved platforms
+**Ubuntu and macOS:** Reserved public placeholders. This publication does not transfer existing Ubuntu firmware-control sources, mobile/macOS applications, binaries or installers.
 
-- [Windows](Windows/) — placeholder, not a support commitment.
-- [Ubuntu](Ubuntu/) — placeholder, not a support commitment.
-- [macOS](macOS/) — placeholder, not a support commitment.
-
-Record approved decisions in [PROJECT_MEMORY.md](PROJECT_MEMORY.md) and use the [shared testing policy](../testing/TEST_POLICY.md). Review source, credentials, dependencies, and licensing before any implementation is added.
+See [public BCC project memory](PROJECT_MEMORY.md), the [public testing matrix](../testing/TEST_MATRIX.md), and the [shared testing policy](../testing/TEST_POLICY.md). Never execute hardware writes based on synthetic tests alone.

@@ -1,0 +1,62 @@
+name: BCC Windows — public build and synthetic checks (NO firmware execution)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Battery-Charge-Control/Windows/**'
+      - '.github/workflows/windows-build.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  source-simulation-compile:
+    name: Windows source, isolation, simulations and compile only
+    runs-on: windows-2025
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: Battery-Charge-Control/Windows
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: '10.0.402'
+      - name: Source and simulation boundary checks
+        shell: pwsh
+        run: |
+          python scripts/check-source.py
+          if ($LASTEXITCODE -ne 0) { throw 'source check failed' }
+          python scripts/check-simulation.py
+          if ($LASTEXITCODE -ne 0) { throw 'simulation isolation failed' }
+          # Public snapshot suites only. The historical CI fixture boundary
+          # suite requires two separate, unpublished approval-gated workflows.
+          python -B -m unittest discover -s tests -p 'test_installer_contract.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'Installer contract tests failed' }
+          python -B -m unittest discover -s tests -p 'test_simulation_boundary.py' -v
+          if ($LASTEXITCODE -ne 0) { throw 'Python regression failed' }
+      - name: Execute managed synthetic simulations ONLY
+        shell: pwsh
+        run: |
+          dotnet run --project tests/BCC.Tests/BCC.Tests.csproj --configuration Release
+          if ($LASTEXITCODE -ne 0) { throw 'managed simulation suite failed' }
+      - name: Compile production app only; never execute it
+        shell: pwsh
+        run: |
+          dotnet build src/BCC.App/BCC.App.csproj --configuration Release -warnaserror
+          if ($LASTEXITCODE -ne 0) { throw 'production compile failed' }
+      - name: Ensure fixture-only Inno compiler
+        shell: pwsh
+        run: |
+          . ./scripts/inno-compiler.ps1
+          if (-not (Find-InnoCompiler)) {
+            choco install innosetup --version=6.7.1 --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { throw 'fixture compiler installation failed' }
+          }
+          if (-not (Find-InnoCompiler)) { throw 'fixture compiler unavailable' }
+      - name: Compile isolated no-firmware fixture, NEVER install or launch
+        shell: pwsh
+        run: |
+          ./scripts/build-simulation.ps1
+          if ($LASTEXITCODE -ne 0) { throw 'fixture compile failed' }

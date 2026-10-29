@@ -1,6 +1,6 @@
 # Eiren & I Open — Shared Project Memory
 
-**Scope:** public repository `scientistsunite/Eiren-and-I-Open` exclusively.  
+**Scope:** public repository `scientistsunite/Eiren-and-I-Open` exclusively.
 **Created:** 2026-10-29.
 
 ## Verified public baseline
@@ -10,7 +10,7 @@
 - Each has Windows, Ubuntu, and macOS **placeholder** directories and an independent public `PROJECT_MEMORY.md`.
 - Shared testing policy, matrix, synthetic fixture guidance, and a structure check live in `testing/`.
 - No application implementations, installers, releases, or functional tests have been introduced as part of this scaffold.
-- No open-source license has been selected yet.
+- The initial scaffold had no license; the Windows BCC source is now published under its separately reviewed component-level `LICENSE`. Other apps remain unlicensed placeholders.
 
 ## Agreed engineering principles
 
@@ -27,3 +27,7 @@
 - Establish application-specific tests and release criteria as code is introduced.
 
 Update only with information suitable for permanent public disclosure.
+
+## First application candidate — 2026-10-29
+
+Battery Charge Control Windows v0.1 is the first reviewed experimental **source-only** publication candidate. Other platform/application folders are placeholders. Its Windows README distinguishes historical simulation/CI fixture evidence from new public testing, which remains pending. No production runtime, ASUS charging tests or firmware permissions are implied. The Windows license is application-scoped.

@@ -28,4 +28,4 @@ Applies to this entire **public** repository.
 
 ## Initial state
 
-Six application roots and Windows/Ubuntu/macOS directories are placeholders only. No implementation, release, platform support, or licensing is implied.
+Initial scaffolding had only placeholders. BCC Windows now has a reviewed experimental **source-only** implementation with an application-scoped license; no executable, hardware acceptance, or production support is implied. All other apps/platforms remain placeholders.
