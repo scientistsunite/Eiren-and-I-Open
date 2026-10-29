@@ -35,7 +35,7 @@ try {
     Remove-Item (Join-Path $Payload 'portable.marker')
     # Export only the reviewed Cylon Raider material and its dedicated public recipe.
     # Git metadata, unrelated applications and local build files are excluded.
-    Invoke-Checked git @('-C', (Join-Path $AppRoot '../..'), 'archive', '--format=zip', "--output=$(Join-Path $Output 'CylonRaider-Source-0.5.1-prerelease.zip')", 'HEAD', 'Cylon-Raider/Windows', '.github/workflows/cylon-raider-v05-prerelease.yml')
+    Invoke-Checked git @('-C', (Join-Path $AppRoot '../..'), 'archive', '--format=zip', "--output=$(Join-Path $Output 'CylonRaider-Source-0.5.1-prerelease.zip')", 'HEAD', 'Cylon-Raider/Windows', '.github/workflows/cylon-raider-v051-prerelease.yml')
     $RunUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
     [ordered]@{
         version = '0.5.1-prerelease'
