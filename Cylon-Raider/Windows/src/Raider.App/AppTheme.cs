@@ -18,7 +18,7 @@ internal static class AppTheme
             if(sizing)return;int width=container.ClientSize.Width-container.Padding.Horizontal;if(width<80)return;
             sizing=true;try{
                 foreach(Control item in container.Controls){
-                    if(item is not (Label or CheckBox or System.Windows.Forms.Button or FlowLayoutPanel))continue;
+                    if(item is not (System.Windows.Forms.Label or CheckBox or System.Windows.Forms.Button or FlowLayoutPanel))continue;
                     int available=Math.Max(1,width-item.Margin.Horizontal);
                     if(item.MaximumSize.Width!=available)item.MaximumSize=new(available,0);
                 }
