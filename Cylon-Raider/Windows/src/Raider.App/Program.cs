@@ -281,7 +281,9 @@ sealed partial class MainWindow : Form
         string state=exiting?"◌ CLOSING — saving and stopping preview":starting?"◌ MONITORING WAITING — connecting":pipe!=null&&!stale&&!unavailable?"● MONITORING ON — receiving measurements":pipe!=null?"◌ MONITORING WAITING — no fresh measurements":boot!=null?"◌ PREVIEW OFF — check background service in Monitoring":"○ MONITORING OFF — no desktop capture";
         monitoringIndicator.Text=state;monitoringIndicator.AccessibleDescription=state;
         monitoringIndicator.ForeColor=SystemInformation.HighContrast?SystemColors.ControlText:state.Contains("MONITORING ON")?AppTheme.Good:state.Contains("MONITORING OFF")?Color.FromArgb(239,157,157):AppTheme.Warning;
-        start.Text=starting||pipe!=null?"Stop monitoring":"Start monitoring";start.AccessibleDescription=starting||pipe!=null?"Stop monitoring. Missing intervals will remain unobserved; recorded history is preserved.":"Start monitoring. An administrator permission prompt may appear.";
+        start.Text=starting||pipe!=null?"Stop monitoring":"Start monitoring";
+        string explanation=starting||pipe!=null?"Stop monitoring. Missing intervals will remain unobserved; recorded history is preserved.":"Start monitoring. An administrator permission prompt may appear.";
+        if(start.AccessibleDescription!=explanation)AppTheme.SetExplanation(start,explanation);
         start.Enabled=!exiting;stopButton.Enabled=(starting||pipe!=null)&&!exiting;
     }
     void Render()=>RenderModern();

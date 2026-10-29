@@ -253,14 +253,17 @@ internal static class Program
                     using(var syntheticPipe=new System.IO.Pipes.AnonymousPipeServerStream())
                     {
                         pipeField.SetValue(window,syntheticPipe);frameTime.SetValue(window,System.Diagnostics.Stopwatch.GetTimestamp());updateState.Invoke(window,null);
+                        Check(Field<Button>(window,"start").Text=="Stop monitoring","Active monitoring offers only Stop in the global header");
                         Check(indicator.Text.Contains("MONITORING ON"),"Fresh synthetic connection displays ON");
                         frameTime.SetValue(window,0L);updateState.Invoke(window,null);
                         Check(indicator.Text.Contains("WAITING"),"Connected preview without measurements displays WAITING instead of ON");
                         pipeField.SetValue(window,null);updateState.Invoke(window,null);
+                        Check(Field<Button>(window,"start").Text=="Start monitoring","Stopped monitoring offers only Start in the global header");
                         Check(indicator.Text.Contains("MONITORING OFF"),"Disconnected desktop preview returns to OFF");
                     }
-                    var restore=typeof(MainWindow).GetMethod("Restore",BindingFlags.Instance|BindingFlags.NonPublic)!;
-                    window.Hide();restore.Invoke(window,null);
+                    window.Hide();
+                    var trayIcon=Field<NotifyIcon>(window,"tray");
+                    typeof(NotifyIcon).GetMethod("OnMouseClick",BindingFlags.Instance|BindingFlags.NonPublic)!.Invoke(trayIcon,new object[]{new MouseEventArgs(MouseButtons.Left,1,0,0,0)});
                     Check(window.Visible&&window.ShowInTaskbar,"Tray restore opens the same main window");
                     var sections = Field<List<Panel>>(window, "sections");
                     window.ClientSize = new(1000, 650);

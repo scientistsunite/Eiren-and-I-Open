@@ -58,6 +58,7 @@ internal static class AppTheme
             ApplyChildren(c,tip,contrast);
         }
     }
+    public static void SetExplanation(Control control,string text){control.AccessibleDescription=text;Tips(control.FindForm()??control).SetToolTip(control,text);}
     static ToolTip Tips(Control root)=>tips.GetValue(root,c=>{var tip=new ToolTip{InitialDelay=1000,ReshowDelay=1000,AutoPopDelay=20000,ShowAlways=true,BackColor=Surface,ForeColor=Text};c.Disposed+=(_,_)=>tip.Dispose();return tip;});
     static string NavigationHelp(string title)
     {
