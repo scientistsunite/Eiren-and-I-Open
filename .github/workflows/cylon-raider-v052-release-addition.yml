@@ -1,0 +1,51 @@
+name: Cylon Raider Windows version collection addition
+
+on:
+  push:
+    branches: [cylon-raider-v052-release-addition]
+    paths:
+      - '.github/workflows/cylon-raider-v052-release-addition.yml'
+      - 'Cylon-Raider/Release-Tools/v052/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cylon-raider-windows-version-collection
+  cancel-in-progress: false
+
+jobs:
+  append-verified-version:
+    if: github.repository == 'scientistsunite/Eiren-and-I-Open' && github.actor == 'scientistsunite' && github.event_name == 'push' && github.ref == 'refs/heads/cylon-raider-v052-release-addition'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Test publication guards using synthetic fixtures
+        run: |
+          python -m unittest discover -s Cylon-Raider/Release-Tools/v05 -p 'test_publish_collection.py' -v
+          python -m unittest discover -s Cylon-Raider/Release-Tools/v052 -p 'test_publish_collection.py' -v
+      - name: Append only the pinned verified v0.5.2 files; retain all earlier versions and the historical tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python Cylon-Raider/Release-Tools/v052/publish_collection.py --work-dir "$RUNNER_TEMP/raider-version-collection" --publish
+      - name: Record public verification receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CylonRaider-v052-collection-publication-receipt
+          path: |
+            ${{ runner.temp }}/raider-version-collection/plan.json
+            ${{ runner.temp }}/raider-version-collection/receipt.json
+            ${{ runner.temp }}/raider-version-collection/release-notes.md
+          if-no-files-found: ignore
+          retention-days: 14
