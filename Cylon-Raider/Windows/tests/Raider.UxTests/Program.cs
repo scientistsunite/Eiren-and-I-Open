@@ -284,6 +284,7 @@ internal static class Program
                             if (section == 4)
                             {
                                 var history = Field<HistoryWindow>(window, "historyWindow");
+                                Check(Field<DataGridView>(history, "applications").ClientSize.Height >= 80, $"{scale:P0}: History retains at least 80px of list viewport at actual fitted dimensions");
                                 Check(!history.TopLevel && history.Parent?.Name == "HistoryHost", $"{scale:P0}: history is embedded in the unified application window");
                             }
                             Check(Application.OpenForms.Cast<Form>().Where(form => form.TopLevel).SequenceEqual(new[] { window }), $"{scale:P0}: {expected[section]} opens no second application window");

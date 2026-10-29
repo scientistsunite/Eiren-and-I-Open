@@ -17,15 +17,17 @@ sealed partial class MainWindow
     Measurement? rendered;long renderedFrames=-1,storageReadAt;bool storageReading;int serviceRequest;
     void BuildShell()
     {
-        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2};root.ColumnStyles.Add(new(SizeType.Absolute,240));root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.AutoSize));root.RowStyles.Add(new(SizeType.Percent,100));
+        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2};root.ColumnStyles.Add(new(SizeType.Absolute,240));root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.Absolute,120));root.RowStyles.Add(new(SizeType.Percent,100));
         navigation=AppTheme.Navigation(["Dashboard","Live Traffic","Top Applications Observed","Monitoring","History","Measurement Health","Storage","Startup Service","Settings","About & Maintenance"]);
         root.Controls.Add(navigation,0,0);root.SetRowSpan(navigation,2);AppTheme.FitNavigation(root,navigation);
-        var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1,Padding=new(20,8,20,4)};header.ColumnStyles.Add(new(SizeType.Percent,100));
+        var headerViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,Padding=new(20,8,20,4)};header.ColumnStyles.Add(new(SizeType.Percent,100));
         var actions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};
         actions.Controls.AddRange([start,stopButton,AppTheme.Button("Exit Cylon Raider",()=>_=ExitApp())]);
         AppTheme.WrapLabels(header);header.Controls.Add(actions,0,0);header.Controls.Add(status,0,1);header.Controls.Add(logging,0,2);
         foreach(var label in new[]{status,logging}){label.Dock=DockStyle.Top;label.Margin=new(0,2,0,2);}
-        root.Controls.Add(header,1,0);root.Controls.Add(pageHost,1,1);Controls.Add(root);
+        headerViewport.Controls.Add(header);root.Controls.Add(headerViewport,1,0);root.Controls.Add(pageHost,1,1);Controls.Add(root);
+        bool fittingHeader=false;void FitHeader(){if(fittingHeader||headerViewport.ClientSize.Width<80)return;fittingHeader=true;try{float desired=header.GetPreferredSize(new(headerViewport.ClientSize.Width,0)).Height;float height=Math.Min(desired,Math.Max(80,ClientSize.Height*.23f));if(Math.Abs(root.RowStyles[0].Height-height)>.5)root.RowStyles[0].Height=height;}finally{fittingHeader=false;}}
+        header.SizeChanged+=(_,_)=>FitHeader();root.SizeChanged+=(_,_)=>FitHeader();
         TableLayoutPanel Page(string title){var viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Visible=false};var body=AppTheme.Page(title);viewport.Controls.Add(body);pageHost.Controls.Add(viewport);sections.Add(viewport);return body;}
         Panel SpaciousPage(string title,Control list,params Control[] tools){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false,Padding=new(20,8,20,12)};
             var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};layout.ColumnStyles.Add(new(SizeType.Percent,100));
@@ -50,8 +52,8 @@ sealed partial class MainWindow
         filter.TextChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);grouping.CheckedChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);sort.SelectedIndexChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);table.ProcessSelected+=p=>_=InspectProcess(p);
         SpaciousPage("Top Applications Observed",topApps,AppTheme.Label("All applications observed in this viewer session, including applications that are no longer active. Click a column heading to sort current totals. Rows stay in place while values update; scrolling keeps your position."));
         SettingsPage(); // Monitoring: existing operations, embedded in the same window.
-        var historyHost=new Panel{Dock=DockStyle.Fill,Name="HistoryHost"};
-        SpaciousPage("History & Reports",historyHost,reportSummary,AppTheme.Button("Open hourly report folder",()=>{try{PlatformPaths.OpenExistingFolder(StoragePaths.Reports(preferences,PlatformPaths.DataRoot));}catch(Exception ex){Failure("Report folder unavailable",ex);}}));
+        var historyPage=new Panel{Dock=DockStyle.Fill,Visible=false,Padding=new(8)};
+        var historyHost=new Panel{Dock=DockStyle.Fill,Name="HistoryHost"};historyPage.Controls.Add(historyHost);pageHost.Controls.Add(historyPage);sections.Add(historyPage);
         var healthPage=Page("Measurement Health");AppTheme.Add(healthPage,healthDetails);AppTheme.Add(healthPage,AppTheme.Label("Unattributed traffic diagnostics",true));reasonGrid.Height=400;reasonGrid.Dock=DockStyle.Top;
         AppTheme.Add(healthPage,unknownSummary);AppTheme.Add(healthPage,unknownChart);AppTheme.Add(healthPage,reasonGrid);
         AppTheme.Add(healthPage,AppTheme.Label("An identified process can have an unknown executable path. Unknown-process bytes are counted once under Unattributed. Lost or unsupported events have unknown byte counts. Late means an event arrived after its event-time bucket closed; partial observations may undercount actual activity. Finalized reports can still have partial coverage."));
@@ -82,9 +84,9 @@ sealed partial class MainWindow
         if(exiting)return;
         var host=sections[4].Controls.Find("HistoryHost",true).Single();
         if(historyWindow==null||historyWindow.IsDisposed||(!string.Equals(historyWindow.FilePath,Path.GetFullPath(HistoryFile),StringComparison.OrdinalIgnoreCase)&&historyWindow.ActiveExport.IsCompleted)){
-            historyWindow?.Dispose();historyWindow=new HistoryWindow(HistoryFile){TopLevel=false,FormBorderStyle=FormBorderStyle.None,Dock=DockStyle.Fill,MinimumSize=Size.Empty,ShowInTaskbar=false};host.Controls.Add(historyWindow);
+            historyWindow?.Dispose();historyWindow=new HistoryWindow(HistoryFile,()=>{try{PlatformPaths.OpenExistingFolder(StoragePaths.Reports(preferences,PlatformPaths.DataRoot));}catch(Exception ex){Failure("Report folder unavailable",ex);}}){TopLevel=false,FormBorderStyle=FormBorderStyle.None,Dock=DockStyle.Fill,MinimumSize=Size.Empty,ShowInTaskbar=false};host.Controls.Add(historyWindow);
         }
-        historyWindow.Show();
+        historyWindow.UpdateReportStatus(reportSummary.Text);historyWindow.Show();
     }
     async Task InspectProcess(Identity? process)
     {
@@ -108,6 +110,7 @@ sealed partial class MainWindow
         long? reportTicks=boot!=null?serviceHealth?.LastReportUtcTicks:reports?.LastGeneratedUtc?.Ticks;
         string lastReport=reportTicks is >0&&reportTicks<=DateTime.MaxValue.Ticks?new DateTime(reportTicks.Value,DateTimeKind.Utc).ToString("O"):"unknown / none recorded by this index";
         reportSummary.Text=(boot!=null?serviceReports:reports?.Status??"Reports unavailable")+"\nLast completed report UTC: "+lastReport+"\nDetailed and report destinations are separate; failures are independent.";
+        historyWindow?.UpdateReportStatus(reportSummary.Text);
         if(Stopwatch.GetTimestamp()-storageReadAt>Stopwatch.Frequency*30&&!storageReading)_=ReadStorage();
         if(frame==null){if(navigation.SelectedIndex==2)topApps.UpdateApplications(sessionApplications.Snapshot());overview.Text="Current rates unavailable — no fresh collector measurement. Previous observed session totals remain historical.";totals.Text="↓ unavailable     ↑ unavailable";
             if(navigation.SelectedIndex==5)healthDetails.Text=$"Collector currently unavailable. Previous observations remain historical; missing intervals are not zero or unattributed traffic.\r\nLast complete bucket UTC: {data.LastCompleteUtc?.ToString("O")??"none received"}\r\nPreviously received complete / partial / unavailable buckets: {data.Complete} / {data.Partial} / {data.Unavailable}\r\nPersistence: {(boot!=null?servicePersistence:writer?.Status??"unavailable")}\r\nReports: {reportSummary.Text}";

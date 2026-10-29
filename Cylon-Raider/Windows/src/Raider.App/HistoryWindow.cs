@@ -20,28 +20,55 @@ sealed class HistoryWindow : Form
     readonly DateTimePicker fromTime=new(){Name="DiagnosticFromUtc",AccessibleName="Diagnostic start UTC date and time",Format=DateTimePickerFormat.Custom,CustomFormat="yyyy-MM-dd HH:mm",ShowUpDown=true,Width=180,Value=DateTime.Today},toTime=new(){Name="DiagnosticToUtc",AccessibleName="Diagnostic end UTC date and time",Format=DateTimePickerFormat.Custom,CustomFormat="yyyy-MM-dd HH:mm",ShowUpDown=true,Width=180,Value=DateTime.Today.AddHours(23).AddMinutes(59)};
     readonly Label diagnosticNotice=AppTheme.Label("Diagnostics are aggregate reason records, separate from bucket completeness. Legacy recordings may have no diagnostic metadata.");
     readonly Label notice=AppTheme.Label("Outside recorded coverage is unobserved. Preview is limited to 10,000 rows; export streams the selected hour.");
-    public HistoryWindow(string file)
+    readonly Label reportStatus=AppTheme.Label("Automatic hourly report status pending.");
+    public HistoryWindow(string file,Action? openReportFolder=null)
     {
         FilePath=Path.GetFullPath(file);reader=new(FilePath);Text="Cylon Raider — History";Width=1280;Height=820;MinimumSize=new(760,520);AutoScaleMode=AutoScaleMode.Dpi;Font=new("Segoe UI",10);BackColor=Color.FromArgb(22,25,31);ForeColor=Color.Gainsboro;Icon=PlatformPaths.OfficialIcon();
-        var controls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true,Padding=new(12)};var refresh=new RoundedButton{Text="Refresh",AutoSize=true};var export=new RoundedButton{Text="Export seconds CSV",AutoSize=true};var reports=new RoundedButton{Text="Export hourly CSV",AutoSize=true};
+        var controls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(controls);var refresh=new RoundedButton{Text="Refresh",AutoSize=true};var export=new RoundedButton{Text="Export seconds CSV",AutoSize=true};var reports=new RoundedButton{Text="Export hourly CSV",AutoSize=true};
         exportActions.AddRange([export,reports]);
         sort.Items.AddRange(["Combined","Downloads","Uploads"]);sort.SelectedIndex=0;controls.Controls.AddRange([date,hour,sort,refresh,export,reports]);
         var tabs=new ThemedTabControl{Dock=DockStyle.Fill};foreach(var entry in new[]{("Applications",applications),("One-second details",seconds),("Coverage / lifecycle events",events)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
         var diagnosticTab=new TabPage("Unattributed diagnostics");
-        var filters=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(filters);
+        var filters=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Padding=new(8)};AppTheme.WrapLabels(filters);
         reason.Items.Add("All reasons");reason.Items.AddRange(Enum.GetNames<AttributionReason>());reason.SelectedIndex=0;
         protocol.Items.Add("All protocols");protocol.Items.AddRange(Enum.GetNames<TrafficProtocol>());protocol.SelectedIndex=0;
         var diagnosticExport=AppTheme.Button("Export diagnostic CSV",()=>RequestExport(()=>ExportDiagnostics(false)));var integrityExport=AppTheme.Button("Export integrity CSV",()=>RequestExport(()=>ExportDiagnostics(true)));exportActions.AddRange([diagnosticExport,integrityExport]);
         filters.Controls.AddRange([AppTheme.Label("Recorded local date above · UTC range below (inclusive minutes)"),fromTime,toTime,reason,protocol,pid,AppTheme.Button("Apply filters",()=>_=RefreshDiagnostics()),diagnosticExport,integrityExport]);
-        diagnosticTab.Controls.Add(attribution);diagnosticTab.Controls.Add(diagnosticNotice);diagnosticNotice.Dock=DockStyle.Bottom;diagnosticTab.Controls.Add(filters);tabs.TabPages.Add(diagnosticTab);
+        BoundedTools(diagnosticTab,attribution,.4f,filters,diagnosticNotice);tabs.TabPages.Add(diagnosticTab);
         foreach(var entry in new[]{("Integrity evidence",integrity),("Recording sessions / provenance",sessions)}){var tab=new TabPage(entry.Item1);tab.Controls.Add(entry.Item2);tabs.TabPages.Add(tab);}
         var source=AppTheme.Label("Recorded history: "+FilePath);source.AccessibleName="History source file";
-        notice.Dock=DockStyle.Bottom;Controls.Add(tabs);Controls.Add(summary);Controls.Add(controls);Controls.Add(notice);Controls.Add(source);
-        void FitText(){int width=Math.Max(1,ClientSize.Width-24);summary.MaximumSize=new(width,0);notice.MaximumSize=new(width,0);diagnosticNotice.MaximumSize=new(width,0);source.MaximumSize=new(width,0);}
-        SizeChanged+=(_,_)=>FitText();FitText();
+        var tools=new List<Control>{source,controls,summary,reportStatus};
+        if(openReportFolder!=null)tools.Add(AppTheme.Button("Open hourly report folder",openReportFolder));
+        tools.Add(notice);BoundedTools(this,tabs,.3f,tools.ToArray());
         FormClosing+=(_,e)=>{if(!ActiveExport.IsCompleted){e.Cancel=true;notice.Text="A CSV export is still running. Close again after it finishes; its destination is preserved until completion.";}};
         refresh.Click+=async(_,_)=>await RefreshHours();date.ValueChanged+=async(_,_)=>await RefreshHours();hour.SelectedIndexChanged+=async(_,_)=>await RefreshRows();sort.SelectedIndexChanged+=async(_,_)=>await RefreshRows();
         export.Click+=(_,_)=>RequestExport(()=>Export(false));reports.Click+=(_,_)=>RequestExport(()=>Export(true));Shown+=async(_,_)=>await RefreshHours();fromTime.ValueChanged+=(_,_)=>{if(!settingRange)rangeEdited=true;};toTime.ValueChanged+=(_,_)=>{if(!settingRange)rangeEdited=true;};AppTheme.Apply(this);
+    }
+    internal void UpdateReportStatus(string text){if(!IsDisposed&&!Disposing)reportStatus.Text=text;}
+    static void BoundedTools(Control host,Control data,float fraction,params Control[] tools)
+    {
+        var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,Margin=Padding.Empty};
+        layout.ColumnStyles.Add(new(SizeType.Percent,100));layout.RowStyles.Add(new(SizeType.Absolute,0));layout.RowStyles.Add(new(SizeType.Percent,100));
+        var viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Margin=Padding.Empty};
+        var body=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,Padding=new(8),Margin=Padding.Empty};
+        body.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(body);
+        foreach(var tool in tools)AppTheme.Add(body,tool);
+        viewport.Controls.Add(body);layout.Controls.Add(viewport,0,0);data.Dock=DockStyle.Fill;data.Margin=Padding.Empty;layout.Controls.Add(data,0,1);host.Controls.Add(layout);
+        bool fitting=false;
+        void Fit()
+        {
+            if(fitting||layout.IsDisposed)return;fitting=true;
+            try{
+                int width=Math.Max(1,viewport.ClientSize.Width);
+                if(body.MaximumSize.Width!=width)body.MaximumSize=new(width,0);
+                float limit=Math.Max(0,(float)Math.Floor(layout.ClientSize.Height*fraction));
+                float preferred=body.GetPreferredSize(new(width,0)).Height;
+                float height=Math.Min(limit,preferred);
+                if(Math.Abs(layout.RowStyles[0].Height-height)>.5f)layout.RowStyles[0].Height=height;
+            }finally{fitting=false;}
+        }
+        layout.SizeChanged+=(_,_)=>Fit();viewport.SizeChanged+=(_,_)=>Fit();body.Layout+=(_,_)=>Fit();
+        Fit();
     }
     internal static void ApplicationClosing(bool value)
     {
