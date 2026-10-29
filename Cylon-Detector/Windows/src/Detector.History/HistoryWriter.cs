@@ -77,7 +77,7 @@ public sealed class HistoryWriter : IAsyncDisposable
                             if(desired!=null){database.ConfigureProfile(new(BuildIdentity.Version,BuildIdentity.SourceRevision,sourceKind,BuildIdentity.IntegrityModel,Aggregator.RecommendedLatenessSeconds,desired.Indefinite,desired.HourlyReports,desired.DetailedDiagnostics,desired.AttributionRecordedDays));database.DetailedDiagnostics=desired.DetailedDiagnostics;database.AttributionRecordedDays=desired.AttributionRecordedDays;database.Indefinite=desired.Indefinite;database.GenerateHourly=desired.HourlyReports;await Execute(()=>database.AppendDetectorActivity(new(work.Requested,work.Requested,"Configuration","Cylon Detector","Settings applied",$"Continuous network persistence={desired.ContinuousNetwork}; report interval={desired.ReportIntervalMinutes} minutes; reports enabled={desired.HourlyReports}; indefinite retention={desired.Indefinite}. Five-minute RAM context remains enabled.")));}
                             long loss=Dropped,controls=Interlocked.Read(ref controlLoss);
                             if(controls!=reportedControls){await RecordLifecycle(work.Requested,HistoryState.WriterGap,$"Lifecycle queue overflow: {controls-reportedControls} boundary events omitted");reportedControls=controls;}
-                            if(loss!=reported){long count,first,last;lock(admission){count=pendingLost;first=firstLost;last=lastLost;pendingLost=0;firstLost=lastLost=0;}if(count>0)await RecordLifecycle(new DateTime(first,DateTimeKind.Utc),HistoryState.WriterGap,$"Persistence queue overflow: {count} measurements omitted between UTC ticks {first} and {last}; missing intervals are not zero");reported=loss;}
+                            if(loss!=reported){long count,first,last;lock(admission){count=pendingLost;first=firstLost;last=lastLost;pendingLost=0;firstLost=lastLost=0;}if(count>0)await RecordLifecycle(new DateTime(first,DateTimeKind.Utc),HistoryState.WriterGap,$"Persistence queue overflow: disk-queue admission rejected {count} measurements between UTC ticks {first} and {last}; recoverable RAM context may later persist. This admission rejection does not establish permanent loss; inspect retained coverage and RAM-recovery observations. Missing intervals are not zero");reported=loss;}
                             if(work.Begin){await Execute(()=>database.Begin(work.Requested));await Execute(()=>database.AppendDetectorActivity(new(work.Requested,work.Requested,"Lifecycle / coverage","Monitoring runtime","Monitoring requested","New monitoring session; earlier unobserved time is not zero. Existing RAM context remains limited to this runtime.")));}
                             if(work.State!=null)await RecordLifecycle(work.Requested,work.State.Value,work.Reason??work.State.Value.ToString());
                             if(work.Frame!=null){
@@ -109,12 +109,13 @@ public sealed class HistoryWriter : IAsyncDisposable
                         }catch(SqliteException ex)when(IsBusy(ex)&&!database.HasTransaction){status="Maintenance deferred by SQLite contention; persistence has priority";}
                         Maximum(ref maxMaintenanceTicks,elapsed.Elapsed.Ticks);maintenanceClock.Restart();
                     }
-                    if(healthy)status=queue.Reader.Count>8?"Persistence catching up — capture continues; queued data is not missing":database.LastFreeBytes<256*1024*1024?"Logging — LOW DISK SPACE":reported+reportedControls==0?"Logging — durable local SQLite history":"Logging with explicit persistence gaps; inspect history events";
+                    if(healthy)status=queue.Reader.Count>8?"Persistence catching up — capture continues; queued data is not missing":database.LastFreeBytes<256*1024*1024?"Logging — LOW DISK SPACE":reported+reportedControls==0?"Logging — durable local SQLite history":"Logging with explicit disk-queue admission rejections; inspect retained coverage and RAM recovery";
                 }
                 PrivacySelection final;
                 lock(admission){final=privacy.Finish(privacyOptions.ContinuousNetwork);privacy.Accepted(final);}
                 foreach(var activity in final.Activities)await Execute(()=>database.AppendDetectorActivity(activity));
                 foreach(var frame in final.Frames){await Execute(()=>database.Append(frame));await Execute(()=>database.ObserveDetectorSecond(frame));}
+                if(final.Frames.Length>0){var first=final.Frames.Min(frame=>frame.StartUtc.ToUniversalTime());var last=final.Frames.Max(frame=>frame.StartUtc.ToUniversalTime());await Execute(()=>database.AppendDetectorActivity(new(DateTime.UtcNow,first,"Persistence / coverage","Network RAM context","Deferred RAM context persisted",$"Orderly shutdown persisted {final.Frames.Length:N0} deferred network records from UTC {first:O} through {last:O}. Recent RAM context may recover earlier disk-queue admission rejections; this does not recover unobserved data or permanent resource-budget omissions.")));}
                 await RecordLifecycle(DateTime.UtcNow,HistoryState.Stopped,"Application exited / history writer closed; pending RAM-only observations end here");await Execute(database.Commit,true);database.CheckpointPassive();
             }catch(Exception ex){
                 healthy=false;status="NOT LOGGING: "+ex.GetType().Name+": "+ex.Message;queue.Writer.TryComplete(ex);
@@ -135,7 +136,7 @@ public sealed class HistoryWriter : IAsyncDisposable
             if(frameCount<capacity&&bytes<=available&&queue.Writer.TryWrite(new(DateTime.UtcNow,Frame:frame,Bytes:bytes,Selection:admitted))){privacy.Accepted(admitted);queuedBytes+=bytes;frameCount++;Maximum(ref peakBytes,queuedBytes);return true;}
             pendingLost++;long utc=frame.StartUtc.ToUniversalTime().Ticks;if(firstLost==0)firstLost=utc;lastLost=utc;Interlocked.Increment(ref dropped);
         }
-        status="Persistence queue full — missing history is explicitly recorded, never zero";return false;
+        status="Persistence queue full — disk-queue admission rejected; recent RAM context may later persist. Unobserved gaps remain explicit, never zero";return false;
     }
     public void Tick()=>Control(new(DateTime.UtcNow,Tick:true));
     public void Begin()=>Control(new(DateTime.UtcNow,Begin:true));

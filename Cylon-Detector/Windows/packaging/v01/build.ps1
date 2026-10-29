@@ -12,10 +12,14 @@ try {
         & $Tool @Arguments
         if ($LASTEXITCODE -ne 0) { throw "$Tool failed ($LASTEXITCODE): $Arguments" }
     }
+    $TestFailures = [Collections.Generic.List[string]]::new()
     foreach ($Suite in @('Detector.Tests', 'Detector.HistoryTests', 'Detector.QualityTests', 'Detector.UiTests', 'Detector.UxTests', 'Detector.SensorTests', 'Detector.PrivacyTests', 'Detector.IdentityTests', 'Detector.ReportTests')) {
-        Invoke-Checked dotnet @('run', '--project', "tests/$Suite", '-c', 'Release')
+        try { Invoke-Checked dotnet @('run', '--project', "tests/$Suite", '-c', 'Release') }
+        catch { $TestFailures.Add($Suite); Write-Output ("FAILED SUITE: $Suite : " + $_.Exception.Message) }
     }
-    Invoke-Checked dotnet @('run', '--no-build', '--project', 'tests/Detector.UxTests', '-c', 'Release', '--', '--close-probe')
+    try { Invoke-Checked dotnet @('run', '--no-build', '--project', 'tests/Detector.UxTests', '-c', 'Release', '--', '--close-probe') }
+    catch { $TestFailures.Add('Native tray-close'); Write-Output ("FAILED SUITE: Native tray-close : " + $_.Exception.Message) }
+    if ($TestFailures.Count -gt 0) { throw ("Required suites failed: " + ($TestFailures -join ', ')) }
     Invoke-Checked python @('tests/offline_audit.py')
     Invoke-Checked python @('tests/detector_privacy_audit.py')
     $Payload = Join-Path $AppRoot 'publish'

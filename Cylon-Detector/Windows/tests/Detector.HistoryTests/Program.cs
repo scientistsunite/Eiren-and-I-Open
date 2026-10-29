@@ -181,10 +181,31 @@ try {
     await using(var writer=new HistoryWriter(FileFor("writer"),new(){ContinuousNetwork=true})){writer.Begin();for(int i=0;i<1000;i++)writer.Append(Frame(t.AddSeconds(i),1,2));await Task.Delay(100);Check(writer.Dropped>0,"bounded writer overflow is explicit");}
     using(var openGate=new ManualResetEventSlim(false)){
         string limitedPath=FileFor("byte-budget");var limited=new HistoryWriter(limitedPath,new(){ContinuousNetwork=true},capacity:128,maximumQueuedBytes:512,factory:p=>{openGate.Wait();return new HistoryStore(p,TimeZoneInfo.Utc);});
-        bool accepted=limited.Append(Frame(t))&&limited.Append(Frame(t.AddSeconds(1)));bool omitted=!limited.Append(Frame(t.AddSeconds(2)));
+        var rejectedFrame=Frame(t.AddSeconds(2),33,3,complete:false,coverage:.5);
+        bool accepted=limited.Append(Frame(t))&&limited.Append(Frame(t.AddSeconds(1)));bool omitted=!limited.Append(rejectedFrame);
         Check(accepted&&omitted&&limited.Dropped==1&&limited.PeakQueuedBytes==512,"byte budget rejects excess admission before frame-count limit");
         openGate.Set();await limited.DisposeAsync();var detail=new HistoryReader(limitedPath);
-        Check(detail.Timeline(t.Ticks,t.AddSeconds(3).Ticks).Count()==2&&detail.Events(20260101).Any(e=>e.State==HistoryState.WriterGap&&e.Reason.Contains(t.AddSeconds(2).Ticks.ToString())),"byte-budget overflow records omitted UTC interval without fabricating idle coverage");
+        var recovered=detail.Timeline(t.Ticks,t.AddSeconds(4).Ticks).OrderBy(row=>row.UtcTicks).ToArray();
+        Check(recovered.Length==3&&recovered.Select(row=>row.UtcTicks).SequenceEqual(new[]{t.Ticks,t.AddSeconds(1).Ticks,rejectedFrame.StartUtc.Ticks})&&
+            recovered[0].Incoming==0&&recovered[0].Outgoing==0&&recovered[0].State==HistoryState.Complete&&recovered[0].CoverageSeconds==1&&
+            recovered[1].Incoming==0&&recovered[1].Outgoing==0&&recovered[1].State==HistoryState.Complete&&recovered[1].CoverageSeconds==1&&
+            recovered[2].Incoming==33&&recovered[2].Outgoing==3&&recovered[2].State==HistoryState.Partial&&recovered[2].CoverageSeconds==.5,
+            "shutdown recovers a queue-rejected RAM frame with its exact nonzero bytes and partial coverage, without invented extra seconds");
+        Check(detail.Events(20260101).Any(e=>e.State==HistoryState.WriterGap&&e.Reason.Contains(rejectedFrame.StartUtc.Ticks.ToString())),
+            "a recovered frame does not erase the original queue-admission failure evidence");
+    }
+    using(var openGate=new ManualResetEventSlim(false)){
+        string expiryPath=FileFor("rejected-ram-expiry");
+        var delayed=new HistoryWriter(expiryPath,new(){ContinuousNetwork=true,Indefinite=true},capacity:128,maximumQueuedBytes:512,factory:p=>{openGate.Wait();return new HistoryStore(p,TimeZoneInfo.Utc);});
+        Check(delayed.Append(Frame(t))&&delayed.Append(Frame(t.AddSeconds(1))),"RAM-expiry fixture fills its byte budget with two genuine observed idle seconds");
+        for(int second=2;second<600;second++)if(delayed.Append(Frame(t.AddSeconds(second),second,second+1)))throw new Exception("Blocked byte-budget fixture unexpectedly admitted a frame");
+        openGate.Set();await delayed.DisposeAsync();
+        var expiryReader=new HistoryReader(expiryPath);var retained=expiryReader.Timeline(t.Ticks,t.AddSeconds(600).Ticks).OrderBy(row=>row.UtcTicks).ToArray();
+        var expectedTicks=new[]{t.Ticks,t.AddSeconds(1).Ticks}.Concat(Enumerable.Range(295,305).Select(second=>t.AddSeconds(second).Ticks)).ToArray();
+        Check(retained.Select(row=>row.UtcTicks).SequenceEqual(expectedTicks)&&retained.Skip(2).All(row=>{
+            long second=(row.UtcTicks-t.Ticks)/TimeSpan.TicksPerSecond;return row.Incoming==second&&row.Outgoing==second+1&&row.State==HistoryState.Complete&&row.CoverageSeconds==1;
+        }),"expired queue-rejected RAM observations remain absent while the exact bounded recent source observations recover on shutdown");
+        Check(expiryReader.Events(20260101).Any(e=>e.State==HistoryState.WriterGap&&e.Reason.Contains(t.AddSeconds(2).Ticks.ToString())),"permanent RAM-expiry gaps retain their original queue-admission interval evidence");
     }
     await using(var failed=new HistoryWriter(FileFor("denied"),new(){ContinuousNetwork=true},factory:_=>throw new UnauthorizedAccessException("fixture"))){await Task.Delay(100);Check(!failed.Healthy&&failed.Status.Contains("NOT LOGGING")&&!failed.Append(Frame(t)),"writer permission failure leaves explicit unavailable logging state");}
     System.IO.File.WriteAllText(Path.Combine(root,"options.json"),"{\"Schema\":99}");var futureSettings=new SettingsFile(root);futureSettings.Load();try{futureSettings.Save(new());throw new Exception("future settings overwritten");}catch(InvalidOperationException){Check(System.IO.File.ReadAllText(Path.Combine(root,"options.json"))=="{\"Schema\":99}","future settings remain read-only without downgrade");}
