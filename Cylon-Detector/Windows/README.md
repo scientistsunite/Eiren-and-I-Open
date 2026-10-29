@@ -1,5 +1,14 @@
-# Cylon Detector — Windows
+# Cylon Detector Windows 0.1
 
-Placeholder directory only. No Windows source code, functional tests, builds, or releases have been published here.
+Detector records locally observable microphone/camera access evidence and correlates it with per-application upload/download measurements at one-second resolution. Its dark, rounded single-window interface and network/storage/service foundations derive from Cylon Raider 0.5.2.
 
-Before adding material, review public suitability and document supported scope and test evidence in [../PROJECT_MEMORY.md](../PROJECT_MEMORY.md).
+- While monitoring runs, a five-minute rolling network buffer remains in RAM regardless of disk logging options. The default disk policy keeps network detail from five minutes before an observed microphone/camera change through five minutes after the last observed active second. Overlapping activity extends the recording. Before startup, interruptions and resource limits are unavailable coverage, never fabricated zeros.
+- Optional continuous network recording retains every observed network second instead. Device changes and unfamiliar-process/unusual-network observations are recorded regardless of device activity. Anomaly indicators are observations, not threat verdicts.
+- Main device/network/anomaly logs share `history.db` in the configured Logs folder. Timestamped summaries use a separate Reports folder and configurable interval (default 60 minutes). Recorded-day retention and indefinite retention follow Raider's economical design.
+- Windows CapabilityAccessManager privacy metadata supplies the microphone/camera evidence. It can be delayed, stale, missing or incomplete, and does not cover every app, driver or device. Detector displays evidence timestamps separately from observation time; unavailable metadata is not proof that devices are off. It does not open devices or collect audio/video content.
+- ETW collection requires explicit administrator approval. Settings offer manual startup, user sign-in startup, or a protected, selected-owner Windows boot service before sign-in. Before that user's hive is loaded, device evidence is unavailable; network monitoring can still run. No automatic permission bypass or device access is attempted.
+- No app network communication, DNS lookup, telemetry or updater. Counts and process/access metadata are local; no packet contents are recorded. RAM prehistory exists only while monitoring is running and cannot recover time before the app/service started. Explicit Clear history also clears the RAM context and familiarity baseline; a fresh window then accumulates. The cache has a 128 MiB estimated-data budget and bounded identity/event counts; budget omissions are logged as incomplete coverage.
+
+Use the unsigned Windows x64 installer for a normal installation. Detector has its own application identity, service, pipe, startup entry, installation folder and data roots. Installing/removing it does not configure Raider. Portable mode has a separate data profile; boot service requires protected installation.
+
+Build on a clean Windows host with .NET SDK 10.0.403, Python 3.13 and Inno Setup 6 using `./packaging/v01/build.ps1`. The dedicated workflow is `.github/workflows/cylon-detector-v01.yml`. Synthetic checks are separate from physical camera/microphone/ETW, installer lifecycle, boot and display-DPI acceptance. See [third-party notices](docs/THIRD-PARTY.md).

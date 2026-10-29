@@ -1,33 +1,9 @@
 # Cylon Detector — Public Project Memory
 
-**Status:** Concept and directory placeholders only. No Cylon Detector implementation, package or release is claimed.
+## 2026-10-30 — Owner-authorized Windows 0.1 implementation
 
-## Scope and architecture
-
-Intended use: Review unusual local application/system behavior (planned concept). Implementation architecture remains to be reviewed in this public repository.
-
-## Platform status
-
-| Platform | Implementation | Tests | Release |
-| --- | --- | --- | --- |
-| Windows | Not added | Not added | None |
-| Ubuntu | Not added | Not added | None |
-| macOS | Not added | Not added | None |
-
-## Public decisions
-
-No application-specific architecture or behavior has been adopted publicly.
-
-## Verification
-
-Only repository-level scaffolding checks are currently defined; they do not test the application.
-
-## Next steps
-
-Review source rights, dependencies, platform-specific tests, and release criteria before importing implementation. Record dated decisions using [MEMORY_SYNC.md](../MEMORY_SYNC.md). Never import private project notes or files without explicit review and authorization.
-
-## 2026-10-29 — MIT license and intended use
-
-- **Decision:** This app directory includes an MIT LICENSE for project-owned published material, subject to separate third-party rights.
-- **Verification:** Documentation only; no new runtime or functional test evidence.
-- **Follow-up:** Review licensing of specific historical downloadable assets separately; this update does not repackage or automatically relicense them.
+- User explicitly authorized public reuse of Cylon Raider 0.5.2 source/assets/build files, an independent Windows x64 Detector app, PRs/squash merging and publication of 0.1 installer/source/checksums and related files. No private sources or private history are used.
+- Core requirements: observable microphone/camera application access metadata; per-application one-second network measurements; always-on five-minute RAM prebuffer while monitoring; default event-triggered disk network detail with five-minute postroll; optional continuous detail; unified main SQLite log; separate configurable interval summaries; nonjudgmental anomaly observations at all times; local-only/no audio/video or payload capture; independent optional pre-sign-in service.
+- Derived runtime network/storage/service/UI foundations match the public Raider 0.5.2 source `36e4d96f8ed4933c108f942c5cd7a81da7bc840b` (public main differs only in version text/metadata). All development is isolated under Detector and its dedicated workflows; Raider and other app files/releases are unchanged.
+- Microphone/camera evidence uses Windows CapabilityAccessManager selected-owner metadata with explicit availability and observation-time limits. It does not promise universal device detection or infer inactive state from missing records.
+- Implementation, deterministic/native validation and release evidence are in progress. No published Detector binary or physical acceptance is claimed yet. Ubuntu/macOS remain placeholders; no new open-source reuse license is granted.

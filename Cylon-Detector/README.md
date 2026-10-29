@@ -1,15 +1,5 @@
 # Cylon Detector
 
-**Intended use (planned):** Review local application and computer signals for unusual patterns, such as unexpected resource use or changes requiring investigation. This is envisioned as a local anomaly-review companion to other observability tools, not a proof of malware or a replacement for security software.
+A Windows x64 privacy-awareness application derived from the owner-authorized Cylon Raider 0.5.2 network/storage/UI components. Detector adds observable microphone and camera activity metadata, a five-minute network RAM buffer, event-triggered network history and local activity/anomaly summaries. It is independently installable from Raider.
 
-**Public status:** Concept and placeholders only. There is no public Cylon Detector implementation, installer, executable or release.
-
-## Reserved platforms
-
-- [Windows](Windows/) — placeholder; no working product claimed.
-- [Ubuntu](Ubuntu/) — placeholder; no working product claimed.
-- [macOS](macOS/) — placeholder; no support commitment.
-
-## Licensing and development
-
-Project-owned content added under this directory is [MIT-licensed](LICENSE), subject to outside rights. A license is not evidence of an implementation. Record public decisions in [project memory](PROJECT_MEMORY.md); review data privacy, false positives, privileges and testing before releasing future functionality.
+See [Windows documentation](Windows/README.md). Ubuntu and macOS remain placeholders. Source/artwork copyright Eiren & I Apps; no new open-source reuse license is granted.
