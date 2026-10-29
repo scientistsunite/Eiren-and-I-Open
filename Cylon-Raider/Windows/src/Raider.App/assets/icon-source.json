@@ -1,0 +1,15 @@
+{
+  "source_sha256": "ca33cdffd8d793454bb63b726259508c77ace1d698b3569480f7a78fb5876a2b",
+  "icon_sha256": "b9d58c2d46b37ebc1e5d1bba2056cd5e878509d7e4ddb209dbb812994df96872",
+  "sizes": [
+    16,
+    24,
+    32,
+    48,
+    64,
+    128,
+    256
+  ],
+  "pillow": "12.3.0",
+  "conversion": "Original pixels; outer near-black matte transparency; proportional crop/padding and resampling, no alternative artwork"
+}
