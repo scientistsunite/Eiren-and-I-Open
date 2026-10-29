@@ -1,0 +1,69 @@
+name: Cylon Raider v0.5 preliminary Windows installer
+
+on:
+  push:
+    branches: [cylon-raider-v05-ui]
+    paths: ['Cylon-Raider/**', '.github/workflows/cylon-raider-v05-preliminary.yml']
+  pull_request:
+    paths: ['Cylon-Raider/**', '.github/workflows/cylon-raider-v05-preliminary.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cylon-raider-v05-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      SourceRevisionId: ${{ github.sha }}
+      RAIDER_UX_FIXTURE: github-hosted-disposable
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: Cylon-Raider/Windows
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.403'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build, verify UI and unchanged measurement/history contracts, package installer
+        run: ./packaging/v05/build.ps1
+      - name: Inspectable synthetic preview evidence
+        if: always()
+        run: |
+          # These images are rendered from the isolated synthetic application only.
+          # Text evidence permits reviewing selected previews without a desktop session.
+          foreach ($Name in @('font-100-00-dashboard.png', 'font-100-04-history.png', 'font-100-06-storage.png', 'font-200-08-settings.png')) {
+            $Preview = Join-Path 'ui-previews' $Name
+            if (Test-Path $Preview) { Write-Output ("RAIDER_PREVIEW " + $Name + " " + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $Preview)))) }
+          }
+      - name: Synthetic application layout previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CylonRaider-0.5.0-synthetic-layout-previews
+          path: Cylon-Raider/Windows/ui-previews/*.png
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Downloadable preliminary installer and provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: CylonRaider-0.5.0-preliminary-Windows-x64
+          path: Cylon-Raider/Windows/release-assets/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Report exact source and validation limits
+        run: |
+          "Cylon Raider v0.5 preliminary installer built from $env:GITHUB_SHA." >> $env:GITHUB_STEP_SUMMARY
+          "The downloadable artifact includes installer, portable ZIP, SHA256 checksums and build provenance." >> $env:GITHUB_STEP_SUMMARY
+          "Synthetic measurement/history and native UI checks passed. Physical Windows desktop, service, upgrade and installer acceptance remain for testing; no release was replaced or published." >> $env:GITHUB_STEP_SUMMARY
