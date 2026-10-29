@@ -24,3 +24,6 @@ jobs:
       - name: Probe real window visibility and handle recreation through one tray-close request
         shell: pwsh
         run: dotnet run --project Cylon-Raider/Windows/tests/Raider.UxTests -c Release -- --close-probe
+      - name: Verify existing unified UI and exit regressions
+        shell: pwsh
+        run: dotnet run --no-build --project Cylon-Raider/Windows/tests/Raider.UxTests -c Release
