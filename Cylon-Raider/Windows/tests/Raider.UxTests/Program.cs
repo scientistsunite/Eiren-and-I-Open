@@ -247,6 +247,18 @@ internal static class Program
                     Check(nav.Items.Cast<object>().Select(item => item.ToString()).SequenceEqual(expected), "Unified navigation has the ten requested sections in the requested order");
                     var indicator=Field<Label>(window,"monitoringIndicator");
                     Check(indicator.Visible&&indicator.Text.Contains("MONITORING OFF"),"Stopped monitoring has an explicit visible OFF indicator");
+                    var updateState=typeof(MainWindow).GetMethod("UpdateMonitoringIndicator",BindingFlags.Instance|BindingFlags.NonPublic)!;
+                    var pipeField=typeof(MainWindow).GetField("pipe",BindingFlags.Instance|BindingFlags.NonPublic)!;
+                    var frameTime=typeof(MainWindow).GetField("lastFrame",BindingFlags.Instance|BindingFlags.NonPublic)!;
+                    using(var syntheticPipe=new System.IO.Pipes.AnonymousPipeServerStream())
+                    {
+                        pipeField.SetValue(window,syntheticPipe);frameTime.SetValue(window,System.Diagnostics.Stopwatch.GetTimestamp());updateState.Invoke(window,null);
+                        Check(indicator.Text.Contains("MONITORING ON"),"Fresh synthetic connection displays ON");
+                        frameTime.SetValue(window,0L);updateState.Invoke(window,null);
+                        Check(indicator.Text.Contains("WAITING"),"Connected preview without measurements displays WAITING instead of ON");
+                        pipeField.SetValue(window,null);updateState.Invoke(window,null);
+                        Check(indicator.Text.Contains("MONITORING OFF"),"Disconnected desktop preview returns to OFF");
+                    }
                     var restore=typeof(MainWindow).GetMethod("Restore",BindingFlags.Instance|BindingFlags.NonPublic)!;
                     window.Hide();restore.Invoke(window,null);
                     Check(window.Visible&&window.ShowInTaskbar,"Tray restore opens the same main window");
@@ -287,7 +299,7 @@ internal static class Program
                             var fullStatus=indicator.RectangleToScreen(indicator.ClientRectangle);
                             for(Control? ancestor=indicator.Parent;ancestor!=null;ancestor=ancestor.Parent)
                                 Check(ancestor.RectangleToScreen(ancestor.ClientRectangle).Contains(fullStatus),$"{scale:P0}: monitoring indicator is fully visible on {expected[section]}");
-                            foreach(var headerLabel in new[]{Field<Label>(window,"status"),indicator})
+                            foreach(var headerLabel in new Control[]{Field<Label>(window,"status"),indicator,Field<Button>(window,"start"),Field<Button>(window,"stopButton")})
                             {
                                 var rect=headerLabel.RectangleToScreen(headerLabel.ClientRectangle);
                                 for(Control? ancestor=headerLabel.Parent;ancestor!=null;ancestor=ancestor.Parent)

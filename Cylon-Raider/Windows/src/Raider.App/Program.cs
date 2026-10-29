@@ -279,7 +279,7 @@ sealed partial class MainWindow : Form
         bool unavailable=boot!=null&&(serviceCapture.StartsWith("Capture unavailable",StringComparison.Ordinal)||serviceCapture.StartsWith("Collector interruption",StringComparison.Ordinal));
         string state=exiting?"◌ CLOSING — saving and stopping preview":starting?"◌ MONITORING WAITING — connecting":pipe!=null&&!stale&&!unavailable?"● MONITORING ON — receiving measurements":pipe!=null?"◌ MONITORING WAITING — no fresh measurements":boot!=null?"◌ PREVIEW OFF — check background service in Monitoring":"○ MONITORING OFF — no desktop capture";
         monitoringIndicator.Text=state;monitoringIndicator.AccessibleDescription=state;
-        monitoringIndicator.ForeColor=SystemInformation.HighContrast?SystemColors.ControlText:state.Contains("MONITORING ON")?AppTheme.Good:state.Contains("MONITORING OFF")?AppTheme.Text:AppTheme.Warning;
+        monitoringIndicator.ForeColor=SystemInformation.HighContrast?SystemColors.ControlText:state.Contains("MONITORING ON")?AppTheme.Good:state.Contains("MONITORING OFF")?Color.FromArgb(239,157,157):AppTheme.Warning;
         start.Enabled=!starting&&pipe==null&&!exiting;stopButton.Enabled=(starting||pipe!=null)&&!exiting;
     }
     void Render()=>RenderModern();
