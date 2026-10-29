@@ -1,4 +1,5 @@
-# Preliminary UI build only. Does not install Detector, start collection or register services.
+# Initial Windows build, regression checks and disposable hosted installer smoke test.
+# The installed UI fixture uses monitoring-off defaults; no real sensor/ETW capture or boot-service registration is exercised.
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $AppRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -50,21 +51,23 @@ try {
         workflow_run = $RunUrl
         dotnet_sdk = (& dotnet --version).Trim()
         operating_system = [Environment]::OSVersion.ToString()
-        validation = @('Original deterministic measurement tests', 'History regression tests', 'Quality and provenance tests', 'Native Options lifecycle and layout tests', 'Native unified navigation and session-table tests', 'Native tray-close visibility, stable HWND and restore checks in normal/maximized/minimized states', 'Runtime source network API guard', 'Self-contained Windows x64 app, collector and service compilation', 'Inno Setup installer compilation', 'Disposable hosted installer/default non-monitoring launch/full exit/data-preserving uninstall and Raider isolation fixture')
-        limits = 'Initial Windows release with limited Windows sensor observability. No physical-device, installer lifecycle, real ETW, boot-service, upgrade, long-duration, multi-monitor or actual display-DPI acceptance is claimed by this workflow.'
+        validation = @('Deterministic measurement tests', 'History regression tests', 'Quality and provenance tests', 'Synthetic sensor-observation contract tests', 'Privacy window and event-triggered persistence tests', 'Collector requester-identity isolation tests', 'Configurable summary-report tests', 'Native Options lifecycle and layout tests', 'Native unified navigation and session-table tests', 'Native tray-close visibility, stable HWND and restore checks in normal/maximized/minimized states', 'Runtime network API and Detector privacy source guards', 'Self-contained Windows x64 app, collector and service compilation', 'Inno Setup installer compilation', 'Disposable hosted installer/default non-monitoring launch/full exit/data-preserving uninstall and Raider isolation fixture')
+        limits = 'Initial Windows release with limited Windows sensor observability. Installer lifecycle evidence is limited to a disposable hosted Windows fixture with monitoring off. No physical-device, physical-machine installer lifecycle, real ETW, boot-service, upgrade, long-duration, multi-monitor or actual display-DPI acceptance is claimed by this workflow.'
         distribution = 'Actions test artifact only; no existing release, tag or asset is modified.'
     } | ConvertTo-Json -Depth 4 | Set-Content (Join-Path $Output 'BUILD-PROVENANCE.json') -Encoding utf8
     $Readme = @'
 Cylon Detector 0.1.0 initial - Windows x64
 
 Run CylonDetector-Setup-0.1.0-initial.exe for the normal installation.
-The installer upgrades the same Cylon Detector application ID and preserves existing data by default.
+The installer uses an application ID independent of Cylon Raider and preserves Detector data by default when uninstalling.
 The portable ZIP uses its own separate portable data location.
 
-Cylon Detector monitors observable device-access metadata and correlates local per-application network measurements. No audio/video contents are captured. Measurement, history, collector and service behavior are preserved.
+Cylon Detector observes microphone/camera access metadata available through Windows and correlates local per-application network measurements. Device-access visibility depends on Windows and application support; missing evidence does not prove inactivity.
+While monitoring, a five-minute network context buffer stays in RAM. By default, observed events select detail for the main local database with post-event context; continuous network detail is optional. Configurable interval summaries use separate report files.
+Detector captures no audio, video or packet contents and makes no external lookups or telemetry requests. Monitoring starts only when requested; optional startup and boot-service modes require explicit configuration.
 Verify SHA256SUMS.txt before testing. BUILD-PROVENANCE.json identifies the exact source and validation limits.
 This initial installer has no publisher code signature. Windows may show an unknown-publisher prompt.
-Keep a backup of important history before testing a initial version.
+Keep a backup of important history before testing an initial version.
 '@
     Set-Content (Join-Path $Output 'READ-ME-FIRST.txt') $Readme -Encoding utf8
     $Sums = Get-ChildItem $Output -File | Where-Object Name -ne 'SHA256SUMS.txt' | Sort-Object Name | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name }

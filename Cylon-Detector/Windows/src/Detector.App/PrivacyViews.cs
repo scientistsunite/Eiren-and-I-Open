@@ -23,8 +23,40 @@ sealed partial class MainWindow
         activityViewSelector.Items.AddRange(["Device, anomaly and network-context timeline","Recorded network details and CSV export"]);
         var tools=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};
         tools.Controls.Add(AppTheme.Button("Refresh activity timeline",()=>_=ReadActivity(true)));
-        var timeline=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};timeline.ColumnStyles.Add(new(SizeType.Percent,100));timeline.RowStyles.Add(new(SizeType.AutoSize));timeline.RowStyles.Add(new(SizeType.AutoSize));timeline.RowStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(timeline);
-        timeline.Controls.Add(activityNotice,0,0);timeline.Controls.Add(tools,0,1);activityGrid.Dock=DockStyle.Fill;timeline.Controls.Add(activityGrid,0,2);
+        var timeline=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=2,Margin=Padding.Empty};timeline.ColumnStyles.Add(new(SizeType.Percent,100));timeline.RowStyles.Add(new(SizeType.Absolute,0));timeline.RowStyles.Add(new(SizeType.Percent,100));
+        var toolViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Margin=Padding.Empty};
+        var toolBody=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=false,ColumnCount=1,RowCount=2,Padding=new(8),Margin=Padding.Empty};toolBody.ColumnStyles.Add(new(SizeType.Percent,100));toolBody.RowStyles.Add(new(SizeType.AutoSize));toolBody.RowStyles.Add(new(SizeType.AutoSize));AppTheme.WrapLabels(toolBody);
+        // Keep the action first. Explanations can scroll independently on compact
+        // windows without consuming the timeline's usable list viewport.
+        toolBody.Controls.Add(tools,0,0);toolBody.Controls.Add(activityNotice,0,1);toolViewport.Controls.Add(toolBody);timeline.Controls.Add(toolViewport,0,0);
+        activityGrid.Dock=DockStyle.Fill;activityGrid.Margin=Padding.Empty;timeline.Controls.Add(activityGrid,0,1);
+        bool fittingTools=false;
+        void FitActivityTools()
+        {
+            if(fittingTools||timeline.IsDisposed)return;fittingTools=true;
+            try
+            {
+                // Own the body height and reapply the cap after font/DPI layout;
+                // scaled absolute row sizes and wrapped-label caches can grow.
+                for(int pass=0;pass<3;pass++)
+                {
+                    int width=Math.Max(1,toolViewport.ClientSize.Width);
+                    if(toolBody.MaximumSize.Width!=width)toolBody.MaximumSize=new(width,0);
+                    toolBody.Width=width;toolBody.PerformLayout();
+                    int preferred=toolBody.GetPreferredSize(new(width,0)).Height;
+                    if(toolBody.Height!=preferred)toolBody.Height=preferred;
+                    toolBody.PerformLayout();
+                    int bottom=toolBody.Controls.Cast<Control>().Where(control=>control.Visible).Select(control=>control.Bottom+control.Margin.Bottom+toolBody.Padding.Bottom).DefaultIfEmpty(toolBody.Padding.Vertical).Max();
+                    preferred=Math.Max(preferred,bottom);if(toolBody.Height!=preferred)toolBody.Height=preferred;
+                    float limit=Math.Max(0,Math.Min((float)Math.Floor(timeline.ClientSize.Height*.4f),timeline.ClientSize.Height-120));
+                    float height=Math.Min(preferred,limit);
+                    if(Math.Abs(timeline.RowStyles[0].Height-height)>.5f)timeline.RowStyles[0].Height=height;
+                    toolViewport.PerformLayout();
+                }
+            }
+            finally{fittingTools=false;}
+        }
+        timeline.Layout+=(_,_)=>FitActivityTools();timeline.SizeChanged+=(_,_)=>FitActivityTools();toolViewport.SizeChanged+=(_,_)=>FitActivityTools();toolBody.Layout+=(_,_)=>FitActivityTools();
         var views=new Panel{Dock=DockStyle.Fill};
         var historyHost=new Panel{Dock=DockStyle.Fill,Name="HistoryHost",Visible=false};
         views.Controls.Add(historyHost);views.Controls.Add(timeline);

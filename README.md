@@ -11,7 +11,7 @@ Public home for Eiren & I software projects. **Purpose and availability are diff
 | [Silent Meteor](Silent-Meteor/) | Customize idle-display/screensaver visuals with meteor animations and supported images or videos. | Windows and Ubuntu releases; source tree remains a placeholder. |
 | [System Chronicle](System-Chronicle/) | Record local performance and thermal readings to investigate heat, load, and resource-use trends. | Windows and Ubuntu releases; source tree remains a placeholder. |
 | [Cylon Raider](Cylon-Raider/) | Observe per-application network traffic, activity history and reports while keeping the monitor itself network-isolated. | [Windows source and prerelease tooling](Cylon-Raider/Windows/) are public, as are Windows prerelease downloads. |
-| [Cylon Detector](Cylon-Detector/) | *Planned:* flag unusual local application/system behavior for investigation, not automatically declare malware. | Conceptual placeholder only; no implementation or release. |
+| [Cylon Detector](Cylon-Detector/) | Review observable microphone/camera application-use metadata, correlated network activity and unusual-behavior indicators, without recording device contents or declaring malware. | [Windows 0.1 source and build tooling](Cylon-Detector/Windows/) are implemented; complete Windows CI and initial release publication are pending. |
 
 Having a release download does not mean corresponding source is included in the current `main` tree, or that the application is production-certified. Consult individual app READMEs and the [Releases page](https://github.com/scientistsunite/Eiren-and-I-Open/releases) for exact features, assets, checksums and limitations.
 

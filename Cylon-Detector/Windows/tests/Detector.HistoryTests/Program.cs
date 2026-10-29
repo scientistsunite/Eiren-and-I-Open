@@ -193,6 +193,9 @@ try {
             "shutdown recovers a queue-rejected RAM frame with its exact nonzero bytes and partial coverage, without invented extra seconds");
         Check(detail.Events(20260101).Any(e=>e.State==HistoryState.WriterGap&&e.Reason.Contains(rejectedFrame.StartUtc.Ticks.ToString())),
             "a recovered frame does not erase the original queue-admission failure evidence");
+        Check(new DetectorActivityReader(limitedPath).Recent().Any(row=>row.Category=="Persistence / coverage"&&row.Change=="Deferred RAM context persisted"&&
+            row.ActivityUtc==rejectedFrame.StartUtc&&row.Detail.Contains(rejectedFrame.StartUtc.ToString("O"))),
+            "the unified activity journal explicitly identifies the measured RAM interval recovered during shutdown");
     }
     using(var openGate=new ManualResetEventSlim(false)){
         string expiryPath=FileFor("rejected-ram-expiry");

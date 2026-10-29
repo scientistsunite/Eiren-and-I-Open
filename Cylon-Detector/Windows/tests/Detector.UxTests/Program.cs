@@ -297,7 +297,14 @@ internal static partial class Program
                             {
                                 var activitySelector=Field<ComboBox>(window,"activityViewSelector");activitySelector.SelectedIndex=0;
                                 await Task.Delay(10);window.PerformLayout();
-                                Check(Field<DataGridView>(window,"activityGrid").Height>=80,$"{scale:P0}: device/anomaly timeline retains a usable list viewport");
+                                var timelineGrid=Field<DataGridView>(window,"activityGrid");
+                                Check(timelineGrid.Height>=80,$"{scale:P0}: device/anomaly timeline retains a usable list viewport");
+                                var activityExplanation=Field<Label>(window,"activityNotice");string previousExplanation=activityExplanation.Text;
+                                activityExplanation.Text=string.Join(" ",Enumerable.Repeat("Observed activity context may contain long local paths and explicit coverage explanations.",20));
+                                window.PerformLayout();timelineGrid.Parent?.PerformLayout();
+                                Check(timelineGrid.Height>=80,$"{scale:P0}: long activity explanations cannot consume the device/anomaly timeline list viewport");
+                                CheckLayout(window,$"Font {scale:P0}, device/anomaly timeline with long explanation");
+                                activityExplanation.Text=previousExplanation;
                                 CheckLayout(window,$"Font {scale:P0}, device/anomaly timeline");
                                 activitySelector.SelectedIndex=1;
                             }
