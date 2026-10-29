@@ -4,7 +4,13 @@ Verified source: `b82a8d0426a78bbff04608b2a26d9d26273a9765`.
 
 [Passing Windows build](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615)
 
-[Download installer bundle](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615/artifacts/12910193270) — available until 12 November 2026; GitHub sign-in may be required. Extract the ZIP and run `CylonRaider-Setup-0.5.0-preliminary.exe`. The bundle also contains portable/source archives, checksums, build provenance and preliminary testing notes.
+[Windows version collection](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0) — titled **Cylon Raider — Windows**, with separate v0.5 preliminary and preserved v0.4 sections.
+
+[Download v0.5 preliminary installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.0-preliminary.exe) directly. Portable/source archives, version-specific checksums and provenance are linked on the collection page. These published files are byte-identical to the verified build.
+
+The [original Actions bundle](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615/artifacts/12910193270) remains supplementary until 12 November 2026.
+
+Publication verification: [run 40917034009](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40917034009) passed 16 publisher tests and all historical/new download hashes. The original release ID, tag and all v0.4 downloads are unchanged.
 
 Installer SHA256:
 
