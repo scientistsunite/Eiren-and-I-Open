@@ -16,6 +16,7 @@ sealed class OptionsWindow : Form
     readonly Label storageInfo=TextLabel("Storage information is loading…");
     readonly Label logError=TextLabel(""),reportError=TextLabel(""),location=TextLabel(""),feedback=TextLabel(""),monitorState=TextLabel("");
     readonly Button apply=new RoundedButton(){Text="&Apply",AutoSize=true,Name="Apply"},close=new RoundedButton(){Text="&Close",AutoSize=true,Name="Close"};
+    readonly Button discard=new RoundedButton(){Text="Discard unsaved changes",AutoSize=true,Name="DiscardChanges"};
     readonly System.Windows.Forms.Timer validationTimer=new(){Interval=200};
     readonly CheckBox details=Check("Retain bounded raw-PID attribution details (sensitive activity metadata)");
     readonly NumericUpDown diagnosticDays=new(){Minimum=0,Maximum=365,Width=120,AccessibleName="Attribution diagnostic retention recorded days; zero follows history"};
@@ -41,7 +42,9 @@ sealed class OptionsWindow : Form
         bootReports=current.Startup==StartupMode.Boot?(current.ReportDirectory??BootConfiguration.DefaultReports):BootConfiguration.DefaultReports;
         var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2,Padding=new(12)};
         root.ColumnStyles.Add(new(SizeType.Absolute,248));FontChanged+=(_,_)=>{navigation.ItemHeight=Math.Max(44,Font.Height*2);root.ColumnStyles[0].Width=Math.Max(248,navigation.Items.Cast<object>().Select(item=>TextRenderer.MeasureText(item.ToString(),Font).Width+40).DefaultIfEmpty(248).Max());};root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.AutoSize));root.Controls.Add(navigation,0,0);root.Controls.Add(content,1,0);
-        var footer=new TableLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,ColumnCount=3,Padding=new(8)};footer.ColumnStyles.Add(new(SizeType.Percent,100));footer.ColumnStyles.Add(new(SizeType.AutoSize));footer.ColumnStyles.Add(new(SizeType.AutoSize));footer.Controls.Add(feedback,0,0);footer.Controls.Add(apply,1,0);footer.Controls.Add(close,2,0);root.Controls.Add(footer,0,1);root.SetColumnSpan(footer,2);Controls.Add(root);CancelButton=close;
+        var footer=new TableLayoutPanel{Dock=DockStyle.Fill,AutoSize=true,ColumnCount=1,Padding=new(8)};footer.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(footer);
+        var footerActions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};footerActions.Controls.AddRange([discard,apply,close]);
+        footer.Controls.Add(feedback,0,0);footer.Controls.Add(footerActions,0,1);root.Controls.Add(footer,0,1);root.SetColumnSpan(footer,2);Controls.Add(root);CancelButton=close;
         navigation.Items.AddRange(["◉  Dashboard","▶  Monitoring","▤  History & Reports","▣  Storage","⚙  Startup & Service","☷  Settings","ⓘ  About & Maintenance"]);
         // Font/DPI autoscaling can run after FontChanged. Reconcile the sidebar
         // against its actual inherited font at layout time, without recursive growth.
@@ -67,6 +70,7 @@ sealed class OptionsWindow : Form
         logs.TextChanged+=(_,_)=>QueueValidation();reports.TextChanged+=(_,_)=>QueueValidation();
         startup.SelectedIndexChanged+=(_,_)=>{if(displayedMode==StartupMode.Boot){bootLogs=logs.Text;bootReports=reports.Text;}else{desktopLogs=logs.Text;desktopReports=reports.Text;}displayedMode=Mode;SetDestinations();QueueValidation();};
         validationTimer.Tick+=(_,_)=>{validationTimer.Stop();_=ValidateAsync();};
+        discard.Click+=(_,_)=>{if(!busy)DiscardChanges();};
         apply.Click+=(_,_)=>{if(!busy)ActiveOperation=ApplyAsync();};close.Click+=(_,_)=>Close();
         FormClosing+=(_,e)=>{if(busy){e.Cancel=true;closeRequested=true;feedback.Text="Finishing the current operation before closing…";}};
         navigation.SelectedIndexChanged+=(_,_)=>{for(int i=0;i<pages.Count;i++)pages[i].Visible=i==navigation.SelectedIndex;monitorState.Text=monitoring();};
@@ -101,6 +105,22 @@ sealed class OptionsWindow : Form
     Task OpenDestination(string path){var check=DestinationRules.Check(Mode,logs.Text,reports.Text);string? error=path==logs.Text?check.LogError:check.ReportError;if(error!=null)throw new IOException(error);if(!Directory.Exists(path))throw new DirectoryNotFoundException("Folder does not exist yet. Apply provisions a new destination; no folder was opened or redirected.");PlatformPaths.OpenExistingFolder(path);return Task.CompletedTask;}
     void SetDestinations(){logs.Text=Mode==StartupMode.Boot?bootLogs:desktopLogs;reports.Text=Mode==StartupMode.Boot?bootReports:desktopReports;location.Text=Mode==StartupMode.Boot?"BOOT MONITORING — permitted root: "+BootConfiguration.Root+"\nChoose separate subfolders. New protected subfolders are created through UAC on Apply.":"DESKTOP / SIGN-IN MONITORING — choose separate local destinations you control.";}
     Preferences Snapshot()=>saved with{DetailedDiagnostics=details.Checked,AttributionRecordedDays=(int)diagnosticDays.Value,Startup=Mode,StartInTray=tray.Checked,OpenMainAtLaunch=main.Checked&&!tray.Checked,ContinueInTray=keep.Checked,AutoMonitor=auto.Checked,Indefinite=indefinite.Checked,HourlyReports=hourly.Checked,LogDirectory=logs.Text,ReportDirectory=reports.Text};
+    void DiscardChanges()
+    {
+        loading=true;
+        try{
+            details.Checked=saved.DetailedDiagnostics;diagnosticDays.Value=Math.Clamp(saved.AttributionRecordedDays,0,365);
+            tray.Checked=saved.StartInTray;main.Checked=saved.OpenMainAtLaunch;keep.Checked=saved.ContinueInTray;
+            auto.Checked=saved.AutoMonitor;indefinite.Checked=saved.Indefinite;hourly.Checked=saved.HourlyReports;
+            startup.SelectedIndex=(int)saved.Startup;displayedMode=saved.Startup;
+            desktopLogs=saved.Startup==StartupMode.Boot?PlatformPaths.DataRoot:(saved.LogDirectory??PlatformPaths.DataRoot);
+            desktopReports=saved.Startup==StartupMode.Boot?Path.Combine(PlatformPaths.DataRoot,"Reports"):(saved.ReportDirectory??Path.Combine(PlatformPaths.DataRoot,"Reports"));
+            bootLogs=saved.Startup==StartupMode.Boot?(saved.LogDirectory??BootConfiguration.DefaultLogs):BootConfiguration.DefaultLogs;
+            bootReports=saved.Startup==StartupMode.Boot?(saved.ReportDirectory??BootConfiguration.DefaultReports):BootConfiguration.DefaultReports;
+            SetDestinations();
+        }finally{loading=false;}
+        QueueValidation();feedback.Text="Unsaved changes discarded. Saved settings are unchanged.";
+    }
     void Changed(){if(!loading&&!busy)feedback.Text=Snapshot()==saved?"No unsaved changes":"Unsaved changes";UpdateApply();}
     void QueueValidation(){if(loading)return;validationVersion++;validation=null;validating=true;validationTimer.Stop();validationTimer.Start();Changed();}
     async Task ValidateAsync()
@@ -124,8 +144,8 @@ sealed class OptionsWindow : Form
     }
     void UpdateApply(){if(IsDisposed)return;apply.Enabled=!busy&&!validating&&validation?.Valid==true&&Snapshot()!=saved;}
     async Task ApplyAsync(){if(busy)return;busy=true;closeRequested=false;var requested=Snapshot();SetBusy();try{var check=await Task.Run(()=>DestinationRules.Check(requested.Startup,requested.LogDirectory!,requested.ReportDirectory!));if(!check.Valid)throw new IOException(check.LogError??check.ReportError);requested=requested with{LogDirectory=check.Logs,ReportDirectory=check.Reports};await save(requested);saved=requested;if(CanNotify){loading=true;logs.Text=requested.LogDirectory;reports.Text=requested.ReportDirectory;loading=false;feedback.Text="Settings saved. Earlier recordings remain in their original folders.";}}catch(Exception ex){closeRequested=false;Failure(ex);}finally{FinishOperation();}}
-    void SetBusy(){content.Enabled=false;navigation.Enabled=false;apply.Enabled=false;feedback.ForeColor=Color.Gainsboro;feedback.Text="Working… monitoring and recording run independently.";}
-    void FinishOperation(){busy=false;if(!CanNotify)return;content.Enabled=true;navigation.Enabled=true;UpdateApply();if(closeRequested)Close();}
+    void SetBusy(){content.Enabled=false;navigation.Enabled=false;apply.Enabled=false;discard.Enabled=false;feedback.ForeColor=Color.Gainsboro;feedback.Text="Working… monitoring and recording run independently.";}
+    void FinishOperation(){busy=false;if(!CanNotify)return;content.Enabled=true;navigation.Enabled=true;discard.Enabled=true;UpdateApply();if(closeRequested)Close();}
     void Failure(Exception ex){reportFailure(ex);if(CanNotify){feedback.ForeColor=Color.Salmon;feedback.Text="Not completed: "+ex.Message;}}
     static void ApplyTheme(Control parent){foreach(Control child in parent.Controls){child.BackColor=child is TextBox or ComboBox or ListBox?Color.FromArgb(31,35,43):Color.FromArgb(22,25,31);child.ForeColor=Color.Gainsboro;if(child is Button button){button.FlatStyle=FlatStyle.Flat;button.BackColor=Color.FromArgb(43,48,58);}ApplyTheme(child);}}
 }

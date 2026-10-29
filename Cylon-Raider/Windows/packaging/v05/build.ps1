@@ -62,6 +62,7 @@ Keep a backup of important history before testing a preliminary version.
     Set-Content (Join-Path $Output 'READ-ME-FIRST.txt') $Readme -Encoding utf8
     $Sums = Get-ChildItem $Output -File | Where-Object Name -ne 'SHA256SUMS.txt' | Sort-Object Name | ForEach-Object { "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name }
     Set-Content (Join-Path $Output 'SHA256SUMS.txt') $Sums -Encoding ascii
+    $Sums | Write-Output
 } finally {
     Pop-Location
 }

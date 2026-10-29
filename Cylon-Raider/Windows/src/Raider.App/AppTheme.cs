@@ -64,6 +64,7 @@ internal static class AppTheme
         if(c is TextBox&&c.AccessibleName is {} report&&report.Contains("reports",StringComparison.OrdinalIgnoreCase))return "Separate local destination for automatic hourly CSV reports. This must differ from the detailed history folder.";
         return label switch {
             "apply" or "apply settings"=>"Validate and save pending settings across all sections. Changing detailed storage or capture metadata may reconnect monitoring; earlier recordings stay in their original folder.",
+            "discard unsaved changes"=>"Restore the last saved settings across all sections, including storage and startup drafts. This does not change saved settings, capture or recorded history.",
             "close"=>"Close this settings view after any active operation finishes.",
             "exit" or "exit cylon raider"=>"Exit Cylon Raider after pending history writes and exports finish. The independent pre-login service continues unless you pause it.",
             "start monitoring"=>"Begin observing traffic with the existing collector. Desktop monitoring may request administrator approval. A new explicit start begins a new viewer session.",

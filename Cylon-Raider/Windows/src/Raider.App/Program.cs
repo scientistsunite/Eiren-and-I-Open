@@ -61,11 +61,24 @@ sealed partial class MainWindow : Form
             }
         };health.Start();Microsoft.Win32.SystemEvents.TimeChanged+=ClockChanged;
         Shown+=async(_,_)=>{
-            StartupEvidence.Mark("window shown");
+            FitWindowToWorkArea();StartupEvidence.Mark("window shown");
             if(!smoke&&Environment.GetCommandLineArgs().Contains("--startup")&&(preferences.StartInTray||!preferences.OpenMainAtLaunch)){Hide();ShowInTaskbar=false;}
             if(smoke){var timer=new System.Windows.Forms.Timer{Interval=75000};timer.Tick+=async(_,_)=>{timer.Stop();timer.Dispose();await ExitApp();};timer.Start();}
             if(smoke||preferences.AutoMonitor||boot!=null)await StartMonitoring(false);
         };
+    }
+    void FitWindowToWorkArea()
+    {
+        if(IsDisposed||Disposing)return;
+        var area=Screen.FromControl(this).WorkingArea;
+        MinimumSize=new(Math.Min(MinimumSize.Width,area.Width),Math.Min(MinimumSize.Height,area.Height));
+        if(WindowState!=FormWindowState.Normal)return;
+        int width=Math.Min(Width,area.Width),height=Math.Min(Height,area.Height);
+        Bounds=new(Math.Clamp(Left,area.Left,area.Right-width),Math.Clamp(Top,area.Top,area.Bottom-height),width,height);
+    }
+    protected override void OnDpiChanged(DpiChangedEventArgs e)
+    {
+        base.OnDpiChanged(e);if(IsHandleCreated)BeginInvoke((Action)FitWindowToWorkArea);
     }
     void ResolveBoot()
     {

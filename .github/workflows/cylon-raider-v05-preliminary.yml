@@ -38,6 +38,15 @@ jobs:
           python-version: '3.13'
       - name: Build, verify UI and unchanged measurement/history contracts, package installer
         run: ./packaging/v05/build.ps1
+      - name: Inspectable synthetic preview evidence
+        if: always()
+        run: |
+          # These images are rendered from the isolated synthetic application only.
+          # Text evidence permits reviewing selected previews without a desktop session.
+          foreach ($Name in @('font-100-00-dashboard.png', 'font-100-04-history.png', 'font-100-06-storage.png', 'font-200-08-settings.png')) {
+            $Preview = Join-Path 'ui-previews' $Name
+            if (Test-Path $Preview) { Write-Output ("RAIDER_PREVIEW " + $Name + " " + [Convert]::ToBase64String([IO.File]::ReadAllBytes((Resolve-Path $Preview)))) }
+          }
       - name: Synthetic application layout previews
         if: always()
         uses: actions/upload-artifact@v4

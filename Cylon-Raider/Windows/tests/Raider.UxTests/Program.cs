@@ -29,6 +29,7 @@ internal static class Program
             Application.SetCompatibleTextRenderingDefault(false);
             IndexRegressions();
             GridRegressions();
+            DiscardDraftRegressions();
             UnifiedShellRegressions();
             Console.WriteLine($"PASS {checks} UX regressions. Session data is synthetic; the unified shell opens only its newly created disposable portable settings/history. No collector was started, no service or registry configuration was changed, and no user data was opened. Font-scale layout simulation is not physical Windows DPI acceptance.");
             return 0;
@@ -108,6 +109,48 @@ internal static class Program
     }
 
     static T Field<T>(object instance, string name) => (T)(instance.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(instance) ?? throw new MissingFieldException(name));
+    static void DiscardDraftRegressions()
+    {
+        int saves = 0, actions = 0;
+        Exception? failure = null;
+        string syntheticRoot = Path.Combine(Path.GetTempPath(), "Raider-Ux-Unsaved-" + Guid.NewGuid().ToString("N"));
+        var saved = new Preferences { Startup = StartupMode.Off, DetailedDiagnostics = false, LogDirectory = Path.Combine(syntheticRoot, "logs"), ReportDirectory = Path.Combine(syntheticRoot, "reports") };
+        Task Operation() { actions++; return Task.CompletedTask; }
+        using var options = new OptionsWindow(saved, _ => { saves++; return Task.CompletedTask; }, () => "Synthetic stopped state", Operation, Operation, Operation, () => actions++, Operation, Operation, Operation);
+        options.Shown += async (_, _) =>
+        {
+            try
+            {
+                options.SelectSection(3);
+                var logs = options.Controls.Find("LogDirectory", true).OfType<TextBox>().Single();
+                var reports = options.Controls.Find("ReportDirectory", true).OfType<TextBox>().Single();
+                var startup = options.Controls.Find("StartupMode", true).OfType<ComboBox>().Single();
+                var details = Field<CheckBox>(options, "details");
+                var discard = options.Controls.Find("DiscardChanges", true).OfType<Button>().Single();
+                logs.Text = Path.Combine(syntheticRoot, "unsaved-desktop-logs");
+                reports.Text = Path.Combine(syntheticRoot, "unsaved-desktop-reports");
+                startup.SelectedIndex = (int)StartupMode.Boot;
+                logs.Text = BootConfiguration.DefaultLogs + "-unsaved";
+                reports.Text = BootConfiguration.DefaultReports + "-unsaved";
+                details.Checked = true;
+                await Task.Delay(30);
+                discard.PerformClick();
+                await Task.Delay(30);
+                Check(startup.SelectedIndex == (int)saved.Startup && details.Checked == saved.DetailedDiagnostics, "Discard unsaved changes restores saved startup mode and diagnostic capture preference");
+                Check(logs.Text == saved.LogDirectory && reports.Text == saved.ReportDirectory, "Discard unsaved changes restores saved detailed-log and report destinations");
+                Check(saves == 0 && actions == 0, "Discarding drafts never saves settings, reconfigures capture, or invokes monitoring/service actions");
+                startup.SelectedIndex = (int)StartupMode.Boot;
+                Check(logs.Text == BootConfiguration.DefaultLogs && reports.Text == BootConfiguration.DefaultReports, "Discard also removes hidden unsaved boot-mode destination drafts");
+                startup.SelectedIndex = (int)StartupMode.Off;
+                Check(logs.Text == saved.LogDirectory && reports.Text == saved.ReportDirectory, "Switching back after discard retains saved desktop destinations");
+                Check(!Directory.Exists(syntheticRoot), "Discard fixture never creates its synthetic destination directories");
+            }
+            catch (Exception error) { failure = error; }
+            finally { options.Close(); }
+        };
+        Application.Run(options);
+        if (failure != null) throw new InvalidOperationException("Discard-draft fixture failed", failure);
+    }
     static IEnumerable<Control> Descendants(Control parent)
     {
         foreach (Control child in parent.Controls)
@@ -167,6 +210,13 @@ internal static class Program
                     string[] expected = ["Dashboard", "Live Traffic", "Top Applications Observed", "Monitoring", "History", "Measurement Health", "Storage", "Startup Service", "Settings", "About & Maintenance"];
                     Check(nav.Items.Cast<object>().Select(item => item.ToString()).SequenceEqual(expected), "Unified navigation has the ten requested sections in the requested order");
                     var sections = Field<List<Panel>>(window, "sections");
+                    window.ClientSize = new(1000, 650);
+                    nav.SelectedIndex = 4;
+                    await Task.Delay(80);
+                    var compactHistory = Field<HistoryWindow>(window, "historyWindow");
+                    var compactApplications = Field<DataGridView>(compactHistory, "applications");
+                    Check(compactApplications.Visible && compactApplications.ClientSize.Height >= 80, "At 1000×650, embedded history retains at least 80 pixels of application-list height");
+                    Check(compactHistory.Parent != null && compactHistory.Bounds == compactHistory.Parent.ClientRectangle, "At 1000×650, history fills its available panel");
                     foreach (float scale in new[] { 1f, 1.25f, 1.5f, 2f })
                     {
                         window.ClientSize = new(1440, 960);
@@ -208,6 +258,14 @@ internal static class Program
                             }
                         }
                     }
+                    var area = Screen.FromControl(window).WorkingArea;
+                    window.MinimumSize = new(area.Width + 100, area.Height + 100);
+                    window.Location = new(area.Left - 100, area.Top - 100);
+                    var fit = typeof(MainWindow).GetMethod("FitWindowToWorkArea", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new MissingMethodException("FitWindowToWorkArea");
+                    fit.Invoke(window, null);
+                    await Task.Delay(30);
+                    Check(window.MinimumSize.Width <= area.Width && window.MinimumSize.Height <= area.Height, "After 200% font simulation, the window minimum fits the actual Windows work area");
+                    Check(area.Contains(window.Bounds), "After 200% font simulation, work-area fitting keeps all application window bounds on screen");
                 }
                 catch (Exception error) { failure = error; }
                 finally
