@@ -194,6 +194,8 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
         if redirected is not None and host not in {"api.github.com", "uploads.github.com"}:
             redirected.remove_header("Authorization")
             redirected.remove_header("Cookie")
+            redirected.remove_header("Accept")
+            redirected.add_header("Accept", "*/*")
         return redirected
 
 
@@ -201,6 +203,10 @@ def api_url(path: str) -> str:
     if path.startswith("https://uploads.github.com/"):
         return path
     return f"https://api.github.com/repos/{REPOSITORY}" + ("/" + path if path else "")
+
+
+def download_accept(path: str) -> str:
+    return "application/octet-stream" if path.startswith("releases/assets/") else "application/vnd.github+json"
 
 
 class GitHub:
@@ -225,7 +231,7 @@ class GitHub:
 
     def download(self, path: str, destination: Path) -> None:
         require(not destination.exists(), "Download destination already exists")
-        headers = {"Authorization": "Bearer " + self.token, "Accept": "application/octet-stream", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "cylon-raider-scoped-collection/0.5"}
+        headers = {"Authorization": "Bearer " + self.token, "Accept": download_accept(path), "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "cylon-raider-scoped-collection/0.5"}
         url = api_url(path)
         print(f"Verify download: {path}", flush=True)
         with self.opener.open(urllib.request.Request(url, headers=headers), timeout=180) as source, destination.open("xb") as target:

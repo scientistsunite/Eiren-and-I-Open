@@ -24,6 +24,10 @@ def origin():
 
 
 class ReleaseGuards(unittest.TestCase):
+    def test_download_accept_matches_github_endpoint(self):
+        self.assertEqual(p.download_accept("actions/artifacts/12910193270/zip"), "application/vnd.github+json")
+        self.assertEqual(p.download_accept("releases/assets/688782967"), "application/octet-stream")
+
     def test_repository_root_and_subresource_urls(self):
         root = "https://api.github.com/repos/" + p.REPOSITORY
         self.assertEqual(p.api_url(""), root)
