@@ -162,6 +162,19 @@ internal static class Program
     }
     static void CheckLayout(Control root, string context)
     {
+        static string Geometry(Control control) => $"{control.GetType().Name} '{control.Name}' bounds={control.Bounds}, client={control.ClientSize}, preferred={control.PreferredSize}";
+        string windowGeometry = root is Form form ? $"window={form.Bounds}, client={form.ClientSize}, minimum={form.MinimumSize}, workingArea={Screen.FromControl(form).WorkingArea}" : Geometry(root);
+        foreach (Control parent in Descendants(root).Prepend(root).Where(control => control.Visible))
+        {
+            if (parent is ScrollableControl { AutoScroll: true }) continue;
+            foreach (Control child in parent.Controls.Cast<Control>().Where(control => control.Visible && control.Width > 0 && control.Height > 0))
+            {
+                var allowed = parent.ClientRectangle;
+                // Native tab borders can use a pixel for their selected page edge.
+                allowed.Inflate(1, 1);
+                Check(allowed.Contains(child.Bounds), $"{context}: direct child fits parent; {Geometry(child)}; parent {Geometry(parent)}; {windowGeometry}");
+            }
+        }
         foreach (Control panel in Descendants(root).Prepend(root).Where(control => control.Visible && control is TableLayoutPanel or FlowLayoutPanel))
         {
             var siblings = panel.Controls.Cast<Control>().Where(control => control.Visible && control.Width > 0 && control.Height > 0).ToArray();
@@ -178,6 +191,27 @@ internal static class Program
         }
         foreach (Button button in Descendants(root).OfType<Button>().Where(button => button.Visible))
             Check(button.Height >= button.Font.Height + button.Padding.Vertical, $"{context}: button text has vertical room: {button.Text}");
+        foreach (CheckBox checkBox in Descendants(root).OfType<CheckBox>().Where(checkBox => checkBox.Visible))
+        {
+            var preferred = checkBox.GetPreferredSize(new Size(Math.Max(1, checkBox.ClientSize.Width), 0));
+            Check(checkBox.ClientSize.Height + 1 >= preferred.Height, $"{context}: checkbox has its preferred text height; {Geometry(checkBox)}; constrainedPreferred={preferred}; {windowGeometry}");
+            if (checkBox.Parent != null)
+                Check(checkBox.Right <= checkBox.Parent.ClientSize.Width - checkBox.Parent.Padding.Right + 1 && preferred.Width <= checkBox.Width + 1, $"{context}: checkbox text fits its content width; {Geometry(checkBox)}; constrainedPreferred={preferred}; parent {Geometry(checkBox.Parent)}; {windowGeometry}");
+        }
+        foreach (Button action in Descendants(root).OfType<Button>().Where(button => button.Visible && button.Name is "DiscardChanges" or "Apply"))
+        {
+            var full = action.RectangleToScreen(action.ClientRectangle);
+            var visible = full;
+            for (Control? ancestor = action.Parent; ancestor != null; ancestor = ancestor.Parent)
+                visible = Rectangle.Intersect(visible, ancestor.RectangleToScreen(ancestor.ClientRectangle));
+            Check(visible == full, $"{context}: footer action remains fully reachable through all ancestor viewports; {Geometry(action)}; visible={visible}, full={full}; {windowGeometry}");
+        }
+    }
+
+    static void FitFixtureWindow(MainWindow window)
+    {
+        var fit = typeof(MainWindow).GetMethod("FitWindowToWorkArea", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new MissingMethodException("FitWindowToWorkArea");
+        fit.Invoke(window, null);
     }
 
     static void UnifiedShellRegressions()
@@ -211,6 +245,7 @@ internal static class Program
                     Check(nav.Items.Cast<object>().Select(item => item.ToString()).SequenceEqual(expected), "Unified navigation has the ten requested sections in the requested order");
                     var sections = Field<List<Panel>>(window, "sections");
                     window.ClientSize = new(1000, 650);
+                    FitFixtureWindow(window);
                     nav.SelectedIndex = 4;
                     await Task.Delay(80);
                     var compactHistory = Field<HistoryWindow>(window, "historyWindow");
@@ -219,8 +254,11 @@ internal static class Program
                     Check(compactHistory.Parent != null && compactHistory.Bounds == compactHistory.Parent.ClientRectangle, "At 1000×650, history fills its available panel");
                     foreach (float scale in new[] { 1f, 1.25f, 1.5f, 2f })
                     {
-                        window.ClientSize = new(1440, 960);
                         window.Font = new Font("Segoe UI", 10 * scale);
+                        var workingArea = Screen.FromControl(window).WorkingArea;
+                        int frameWidth = window.Width - window.ClientSize.Width, frameHeight = window.Height - window.ClientSize.Height;
+                        window.ClientSize = new(Math.Min(1440, Math.Max(1, workingArea.Width - frameWidth)), Math.Min(960, Math.Max(1, workingArea.Height - frameHeight)));
+                        FitFixtureWindow(window);
                         for (int section = 0; section < expected.Length; section++)
                         {
                             nav.SelectedIndex = section;
@@ -229,11 +267,18 @@ internal static class Program
                             {
                                 var options = Field<OptionsWindow>(window, "optionsWindow");
                                 options.Font = new Font("Segoe UI", 10 * scale);
+                                FitFixtureWindow(window);
                                 Check(!options.TopLevel && options.Parent == sections[section], $"{scale:P0}: {expected[section]} uses the embedded settings form");
                                 Check(!Field<ListBox>(options, "navigation").Visible, $"{scale:P0}: the legacy secondary settings navigation remains hidden");
                             }
                             window.PerformLayout();
                             await Task.Delay(10);
+                            var shellRoot = window.Controls[0];
+                            var pageHost = Field<Panel>(window, "pageHost");
+                            string dimensions = $"window={window.Bounds}, client={window.ClientSize}, shellRoot={shellRoot.Bounds}/{shellRoot.ClientSize}, pageHost={pageHost.Bounds}/{pageHost.ClientSize}, section={sections[section].Bounds}/{sections[section].ClientSize}, workingArea={Screen.FromControl(window).WorkingArea}";
+                            Check(Screen.FromControl(window).WorkingArea.Contains(window.Bounds), $"{scale:P0}: fitted application window remains inside the actual work area; {dimensions}");
+                            Check(shellRoot.ClientSize.Width <= window.ClientSize.Width && shellRoot.ClientSize.Height <= window.ClientSize.Height, $"{scale:P0}: shell layout uses the actual fitted client area; {dimensions}");
+                            Check(pageHost.ClientRectangle.Contains(sections[section].Bounds), $"{scale:P0}: selected section fits its actual page host; {dimensions}");
                             Check(sections[section].Visible && sections.Where((_, index) => index != section).All(panel => !panel.Visible), $"{scale:P0}: only the selected {expected[section]} section is visible");
                             Check(TextRenderer.MeasureText(expected[section], nav.Font).Width + 20 <= nav.ClientSize.Width, $"{scale:P0}: {expected[section]} navigation label fits");
                             if (section == 4)
@@ -261,8 +306,7 @@ internal static class Program
                     var area = Screen.FromControl(window).WorkingArea;
                     window.MinimumSize = new(area.Width + 100, area.Height + 100);
                     window.Location = new(area.Left - 100, area.Top - 100);
-                    var fit = typeof(MainWindow).GetMethod("FitWindowToWorkArea", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new MissingMethodException("FitWindowToWorkArea");
-                    fit.Invoke(window, null);
+                    FitFixtureWindow(window);
                     await Task.Delay(30);
                     Check(window.MinimumSize.Width <= area.Width && window.MinimumSize.Height <= area.Height, "After 200% font simulation, the window minimum fits the actual Windows work area");
                     Check(area.Contains(window.Bounds), "After 200% font simulation, work-area fitting keeps all application window bounds on screen");

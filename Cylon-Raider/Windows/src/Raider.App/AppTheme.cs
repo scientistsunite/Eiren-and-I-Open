@@ -12,7 +12,20 @@ internal static class AppTheme
     static readonly ConditionalWeakTable<Control,object> themedInputs=new();
     public static Label Label(string text,bool heading=false)=>new(){Text=text,AutoSize=true,Dock=DockStyle.Top,ForeColor=heading?Text:Muted,Font=new("Segoe UI",heading?18:10,heading?FontStyle.Bold:FontStyle.Regular),Margin=new(0,8,0,12),UseMnemonic=false};
     public static Button Button(string text,Action action){var b=new RoundedButton{Text=text,AutoSize=true,Padding=new(12,7,12,7),Margin=new(0,4,8,4)};b.Click+=(_,_)=>action();return b;}
-    public static void WrapLabels(Control container){bool sizing=false;container.Layout+=(_,_)=>{if(sizing)return;sizing=true;try{int width=Math.Max(1,container.ClientSize.Width-container.Padding.Horizontal);foreach(var label in container.Controls.OfType<Label>())if(label.MaximumSize.Width!=width)label.MaximumSize=new(width,0);}finally{sizing=false;}};}
+    public static void WrapLabels(Control container)
+    {
+        bool sizing=false;container.Layout+=(_,_)=>{
+            if(sizing)return;int width=container.ClientSize.Width-container.Padding.Horizontal;if(width<80)return;
+            sizing=true;try{
+                foreach(Control item in container.Controls){
+                    if(item is not (Label or CheckBox or System.Windows.Forms.Button or FlowLayoutPanel))continue;
+                    int available=Math.Max(1,width-item.Margin.Horizontal);
+                    if(item.MaximumSize.Width!=available)item.MaximumSize=new(available,0);
+                }
+            }finally{sizing=false;}
+        };
+    }
+
     public static TableLayoutPanel Page(string title){var p=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1,Padding=new(24,16,24,24)};p.ColumnStyles.Add(new(SizeType.Percent,100));WrapLabels(p);Add(p,Label(title,true));return p;}
     public static void Add(TableLayoutPanel p,Control c){p.RowCount++;p.RowStyles.Add(new(SizeType.AutoSize));p.Controls.Add(c,0,p.RowCount-1);}
     public static DataGridView Grid()=>new(){Dock=DockStyle.Fill,ReadOnly=true,AllowUserToAddRows=false,AllowUserToDeleteRows=false,RowHeadersVisible=false,SelectionMode=DataGridViewSelectionMode.FullRowSelect,MultiSelect=false,AutoSizeColumnsMode=DataGridViewAutoSizeColumnsMode.Fill,AutoSizeRowsMode=DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders,ColumnHeadersHeightSizeMode=DataGridViewColumnHeadersHeightSizeMode.AutoSize,BackgroundColor=Surface,BorderStyle=BorderStyle.None,EnableHeadersVisualStyles=false,ColumnHeadersDefaultCellStyle=new(){BackColor=Raised,ForeColor=Text,Padding=new(6)},DefaultCellStyle=new(){BackColor=Surface,ForeColor=Text,SelectionBackColor=Selected,SelectionForeColor=Text,Padding=new(6)},GridColor=Border,RowTemplate={Height=34}};
@@ -25,7 +38,7 @@ internal static class AppTheme
     public static void FitNavigation(TableLayoutPanel root,ListBox nav){bool changing=false;root.Layout+=(_,_)=>{if(changing)return;float needed=Math.Max(240,nav.Items.Cast<object>().Select(item=>TextRenderer.MeasureText(item.ToString(),nav.Font).Width).DefaultIfEmpty(200).Max()+nav.Margin.Horizontal+SystemInformation.VerticalScrollBarWidth+40);if(Math.Abs(root.ColumnStyles[0].Width-needed)<.5)return;changing=true;try{root.ColumnStyles[0].Width=needed;nav.ItemHeight=Math.Max(48,nav.Font.Height*2);}finally{changing=false;}};}
     public static void Apply(Control root)
     {
-        if(root is Form form&&themedWindows.TryAdd(form,new object())){form.HandleCreated+=(_,_)=>ThemeTitleBar(form);if(form.IsHandleCreated)ThemeTitleBar(form);}
+        if(root is Form form&&themedWindows.TryAdd(form,new object())){WrapLabels(form);form.HandleCreated+=(_,_)=>ThemeTitleBar(form);if(form.IsHandleCreated)ThemeTitleBar(form);}
         bool contrast=SystemInformation.HighContrast;root.BackColor=contrast?SystemColors.Control:Background;root.ForeColor=contrast?SystemColors.ControlText:Text;ApplyChildren(root,Tips(root),contrast);
     }
     static void ApplyChildren(Control root,ToolTip tip,bool contrast)
