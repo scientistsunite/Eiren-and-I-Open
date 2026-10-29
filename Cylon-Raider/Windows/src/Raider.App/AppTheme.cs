@@ -58,6 +58,7 @@ internal static class AppTheme
             ApplyChildren(c,tip,contrast);
         }
     }
+    public static void SetExplanation(Control control,string text){control.AccessibleDescription=text;Tips(control.FindForm()??control).SetToolTip(control,text);}
     static ToolTip Tips(Control root)=>tips.GetValue(root,c=>{var tip=new ToolTip{InitialDelay=1000,ReshowDelay=1000,AutoPopDelay=20000,ShowAlways=true,BackColor=Surface,ForeColor=Text};c.Disposed+=(_,_)=>tip.Dispose();return tip;});
     static string NavigationHelp(string title)
     {
@@ -106,7 +107,7 @@ internal static class AppTheme
             _ when label.Contains("raw-pid",StringComparison.Ordinal)=>"Retain bounded raw process-ID attribution details, which can reveal sensitive application activity. Aggregate failure summaries remain available without this option.",
             _ when c is ComboBox=>string.IsNullOrWhiteSpace(c.AccessibleDescription)?"Choose "+(string.IsNullOrWhiteSpace(text)?"an option":text)+". See the adjacent explanation for its effect.":c.AccessibleDescription,
             _ when c is DateTimePicker=>string.IsNullOrWhiteSpace(c.AccessibleDescription)?"Choose "+(string.IsNullOrWhiteSpace(text)?"a recorded date or time range":text)+" to inspect recorded history. This does not change collection settings.":c.AccessibleDescription,
-            _ when c is NumericUpDown=>"Choose attribution diagnostic retention in distinct recorded days. Zero follows overall history retention, including indefinite retention.",
+            _ when c is NumericUpDown=>"Choose attribution diagnostic retention in distinct recorded days. Enter 0 to keep attribution diagnostics for as long as your traffic history: the newest 15 recorded days by default, or indefinitely when Keep history indefinitely is selected. A value from 1 to 365 sets a separate diagnostic limit; deleting traffic history also deletes its diagnostics.",
             _ when label.Contains("export",StringComparison.Ordinal)=>"Export the selected recorded data to a local CSV file. Choose the destination in the save dialog; capture continues independently.",
             _=>string.IsNullOrWhiteSpace(c.AccessibleDescription)?(string.IsNullOrWhiteSpace(text)?"Edit this field; see the adjacent explanation for its meaning.":text+". See the adjacent explanation for details."):c.AccessibleDescription};
     }

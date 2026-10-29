@@ -7,11 +7,18 @@ sealed class TrafficChart : Control
     public TrafficChart(){DoubleBuffered=true;Height=160;Dock=DockStyle.Top;AccessibleName="Observed download and upload chart";BackColor=AppTheme.Surface;}
     protected override void OnFontChanged(EventArgs e){base.OnFontChanged(e);Height=Math.Max(160,Font.Height*9);}
     public void Update(TrafficPoint[] values){int begin=0;for(int i=1;i<values.Length;i++)if(values[i].Utc<=values[i-1].Utc)begin=i;points=begin==0?values:values[begin..];Invalidate();}
+    internal Rectangle PlotBounds()
+    {
+        int width=Math.Max(1,Width-24);
+        int caption=TextRenderer.MeasureText("↓ download · ↑ upload · observed seconds · gaps unavailable",Font,new Size(width,int.MaxValue),TextFormatFlags.WordBreak).Height;
+        int top=caption+16,bottom=Height-Font.Height-20;
+        return new Rectangle(12,top,width,Math.Max(1,bottom-top));
+    }
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);var g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;int width=Math.Max(1,Width-24);string legend="↓ download · ↑ upload · observed seconds · gaps unavailable";
         int caption=TextRenderer.MeasureText(g,legend,Font,new Size(width,int.MaxValue),TextFormatFlags.WordBreak).Height;
-        var area=new Rectangle(12,caption+16,width,Math.Max(1,Height-caption-48));
+        var area=PlotBounds();
         using var line=new Pen(AppTheme.Border);g.DrawLine(line,area.Left,area.Bottom,area.Right,area.Bottom);
         TextRenderer.DrawText(g,legend,Font,new Rectangle(12,6,width,caption),AppTheme.Muted,TextFormatFlags.WordBreak);
         if(points.Length==0){TextRenderer.DrawText(g,"Waiting for observed measurements",Font,area,AppTheme.Muted,TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter);return;}

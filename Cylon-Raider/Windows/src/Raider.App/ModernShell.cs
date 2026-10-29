@@ -17,38 +17,39 @@ sealed partial class MainWindow
     Measurement? rendered;long renderedFrames=-1,storageReadAt;bool storageReading;int serviceRequest;
     void BuildShell()
     {
-        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2};root.ColumnStyles.Add(new(SizeType.Absolute,240));root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.Absolute,120));root.RowStyles.Add(new(SizeType.Percent,100));
+        var root=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2};root.ColumnStyles.Add(new(SizeType.Absolute,240));root.ColumnStyles.Add(new(SizeType.Percent,100));root.RowStyles.Add(new(SizeType.AutoSize));root.RowStyles.Add(new(SizeType.Percent,100));
         navigation=AppTheme.Navigation(["Dashboard","Live Traffic","Top Applications Observed","Monitoring","History","Measurement Health","Storage","Startup Service","Settings","About & Maintenance"]);
         root.Controls.Add(navigation,0,0);root.SetRowSpan(navigation,2);AppTheme.FitNavigation(root,navigation);
-        var headerViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,Padding=new(20,8,20,4)};header.ColumnStyles.Add(new(SizeType.Percent,100));
+        var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,RowCount=0,Padding=new(20,8,20,4)};header.ColumnStyles.Add(new(SizeType.Percent,100));
         var actions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};
-        actions.Controls.AddRange([start,stopButton,AppTheme.Button("Exit Cylon Raider",()=>_=ExitApp())]);
-        AppTheme.WrapLabels(header);header.Controls.Add(actions,0,0);header.Controls.Add(status,0,1);header.Controls.Add(logging,0,2);
+        stopButton.Visible=false;actions.Controls.Add(start);
+        AppTheme.WrapLabels(header);AppTheme.Add(header,monitoringIndicator);AppTheme.Add(header,actions);
         foreach(var label in new[]{status,logging}){label.Dock=DockStyle.Top;label.Margin=new(0,2,0,2);}
-        headerViewport.Controls.Add(header);root.Controls.Add(headerViewport,1,0);root.Controls.Add(pageHost,1,1);Controls.Add(root);
-        bool fittingHeader=false;void FitHeader(){if(fittingHeader||headerViewport.ClientSize.Width<80)return;fittingHeader=true;try{float desired=header.GetPreferredSize(new(headerViewport.ClientSize.Width,0)).Height;float height=Math.Min(desired,Math.Max(80,ClientSize.Height*.23f));if(Math.Abs(root.RowStyles[0].Height-height)>.5)root.RowStyles[0].Height=height;}finally{fittingHeader=false;}}
-        header.SizeChanged+=(_,_)=>FitHeader();root.SizeChanged+=(_,_)=>FitHeader();
+        root.Controls.Add(header,1,0);root.Controls.Add(pageHost,1,1);Controls.Add(root);
         TableLayoutPanel Page(string title){var viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true,Visible=false};var body=AppTheme.Page(title);viewport.Controls.Add(body);pageHost.Controls.Add(viewport);sections.Add(viewport);return body;}
         Panel SpaciousPage(string title,Control list,params Control[] tools){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false,Padding=new(20,8,20,12)};
             var layout=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=3};layout.ColumnStyles.Add(new(SizeType.Percent,100));
             layout.RowStyles.Add(new(SizeType.AutoSize));layout.RowStyles.Add(new(SizeType.Absolute,100));layout.RowStyles.Add(new(SizeType.Percent,100));
-            layout.Controls.Add(AppTheme.Label(title,true),0,0);
-            var toolViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};var toolBody=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};toolBody.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(toolBody);
+            var pageTitle=AppTheme.Label(title,true);layout.Controls.Add(pageTitle,0,0);
+            var toolBody=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=1};toolBody.ColumnStyles.Add(new(SizeType.Percent,100));AppTheme.WrapLabels(toolBody);
+            var toolViewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};
             foreach(var tool in tools)AppTheme.Add(toolBody,tool);toolViewport.Controls.Add(toolBody);layout.Controls.Add(toolViewport,0,1);
-            bool fitting=false;void FitTools(){if(fitting)return;fitting=true;try{float height=Math.Min(toolBody.GetPreferredSize(new(Math.Max(1,toolViewport.ClientSize.Width),0)).Height,Math.Max(48,viewport.ClientSize.Height*.4f));if(Math.Abs(layout.RowStyles[1].Height-height)>.5)layout.RowStyles[1].Height=height;}finally{fitting=false;}}
-            viewport.SizeChanged+=(_,_)=>FitTools();toolBody.SizeChanged+=(_,_)=>FitTools();
+            bool fitting=false;void FitTools(){if(fitting)return;fitting=true;try{float desired=toolBody.GetPreferredSize(new(Math.Max(1,toolViewport.ClientSize.Width),0)).Height;float limit=Math.Max(0,Math.Min(layout.ClientSize.Height*.45f,layout.ClientSize.Height-pageTitle.Height-pageTitle.Margin.Vertical-120));float height=Math.Min(desired,limit);if(Math.Abs(layout.RowStyles[1].Height-height)>.5)layout.RowStyles[1].Height=height;}finally{fitting=false;}}
+            layout.Layout+=(_,_)=>FitTools();viewport.SizeChanged+=(_,_)=>FitTools();toolBody.SizeChanged+=(_,_)=>FitTools();
             list.Dock=DockStyle.Fill;layout.Controls.Add(list,0,2);viewport.Controls.Add(layout);pageHost.Controls.Add(viewport);sections.Add(viewport);return viewport;}
         void SettingsPage(){var viewport=new Panel{Dock=DockStyle.Fill,Visible=false};pageHost.Controls.Add(viewport);sections.Add(viewport);}
         var dashboard=Page("Dashboard");totals.Font=new("Segoe UI",25,FontStyle.Bold);totals.Dock=DockStyle.Top;totals.Margin=new(0,8,0,14);
-        AppTheme.Add(dashboard,totals);AppTheme.Add(dashboard,overview);AppTheme.Add(dashboard,sessionSummary);AppTheme.Add(dashboard,chart);
+        AppTheme.Add(dashboard,status);AppTheme.Add(dashboard,totals);AppTheme.Add(dashboard,overview);AppTheme.Add(dashboard,sessionSummary);AppTheme.Add(dashboard,chart);
         AppTheme.Add(dashboard,AppTheme.Button("View all applications observed this session",()=>navigation.SelectedIndex=2));
-        AppTheme.Add(dashboard,storageSummary);AppTheme.Add(dashboard,AppTheme.Label("Recent integrity evidence"));AppTheme.Add(dashboard,recentAlerts);
+        AppTheme.Add(dashboard,logging);AppTheme.Add(dashboard,storageSummary);AppTheme.Add(dashboard,AppTheme.Label("Recent integrity evidence"));AppTheme.Add(dashboard,recentAlerts);
         AppTheme.Add(dashboard,AppTheme.Button("Inspect Measurement Health",()=>navigation.SelectedIndex=5));
         AppTheme.Add(dashboard,AppTheme.Label("Alt+Home: Dashboard · Ctrl+1…9: sections · Ctrl+0: About & Maintenance. Select a section with the mouse or arrow keys."));
+        filter.Width=320;sort.Width=300;
         var liveControls=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};sort.AccessibleName="Current traffic sort order";sort.AccessibleDescription="Immediately sort visible live traffic by combined, download or upload rate. Recording is unaffected.";sort.Items.AddRange(["Combined observed rate","Download rate","Upload rate"]);sort.SelectedIndex=0;
         liveControls.Controls.AddRange([AppTheme.Input(filter),AppTheme.Input(sort),grouping]);
         var detailsPanel=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,WrapContents=true};detailsPanel.Controls.Add(AppTheme.Button("Refresh selected process details",()=>{inspectedProcess=null;_=InspectProcess(selectedProcess);}));
-        SpaciousPage("Live Traffic",table,liveControls,liveNotice,processDetails,detailsPanel);
+        var showDetails=new CheckBox{Text="Show selected process details",AutoSize=true};processDetails.Visible=false;showDetails.CheckedChanged+=(_,_)=>processDetails.Visible=showDetails.Checked;detailsPanel.Controls.Add(showDetails);
+        SpaciousPage("Live Traffic",table,liveControls,liveNotice,detailsPanel,processDetails);
         filter.TextChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);grouping.CheckedChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);sort.SelectedIndexChanged+=(_,_)=>table.Configure(sort.SelectedIndex,filter.Text,grouping.Checked);table.ProcessSelected+=p=>_=InspectProcess(p);
         SpaciousPage("Top Applications Observed",topApps,AppTheme.Label("All applications observed in this viewer session, including applications that are no longer active. Click a column heading to sort current totals. Rows stay in place while values update; scrolling keeps your position."));
         SettingsPage(); // Monitoring: existing operations, embedded in the same window.

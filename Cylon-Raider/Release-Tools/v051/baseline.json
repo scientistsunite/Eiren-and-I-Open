@@ -1,0 +1,59 @@
+{
+  "body": "# Cylon Raider — Windows\n\nWindows versions are collected on this page. Each version has its own downloads and checksums; earlier files remain available. The existing release URL and historical v0.4.0 tag are retained.\n\n## v0.5.0 preliminary — latest addition\n\nA UI and user-experience update: one application window with the requested ten sections, embedded History and settings, a complete session application list with stable scrolling, rounded dark controls and one-second explanations. Measurement, logging, reports, storage and service logic are preserved apart from version provenance.\n\n- **[Windows x64 installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.0-preliminary.exe)**\n- [Portable Windows x64 archive](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Portable-0.5.0-preliminary-Windows-x64.zip)\n- [Complete version-specific source and build recipe](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Source-0.5.0-preliminary.zip)\n- [SHA256 checksums](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.5.0-preliminary-SHA256SUMS.txt) · [Build provenance](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.0-preliminary-BUILD-PROVENANCE.json) · [Testing notes](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.0-preliminary-READ-ME-FIRST.txt)\n\nVerified source: `b82a8d0426a78bbff04608b2a26d9d26273a9765`. [Passing Windows build](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40903515615): measurement 19, history 60, quality/provenance 76, native settings 78 and unified UX 3,823 assertions, plus source network guard, self-contained publishing and installer compilation.\n\nUnsigned preliminary build for user testing. Physical DPI/multi-monitor, real ETW, boot-service and installer lifecycle/upgrade acceptance remain outstanding. This addition publishes the already-verified build without rebuilding it. Build metadata and notes retain their original bytes and use versioned filenames here.\n\n## v0.4.0 — preserved downloads\n\n- [Windows installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.4.0.exe)\n- [Portable archive](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Windows-0.4.0-Portable.zip)\n- [SHA256 checksums](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.4.0-SHA256SUMS.txt)\n\n<details>\n<summary>Original v0.4.0 release notes, preserved verbatim</summary>\n\n# Cylon Raider — Windows 0.4.0\n\nPRERELEASE: sequential Windows VM validation passed, but physical-machine acceptance testing was still outstanding when this package was selected.\n\nPackage source: individually selected release assets, checked locally before public upload.\nSHA-256 checksums are attached. No project-wide open-source license has yet been selected.\nGitHub's automatically generated Source code archives currently include public repository scaffolding, not this application's implementation.\n\n</details>\n\nGitHub's automatically generated Source code archives follow the historical tag and are not the v0.5 implementation. Use the explicit v0.5 source archive above. No new project-wide open-source reuse license is granted.\n",
+  "assets": [
+    {
+      "name": "cylon-raider-windows-v0.4.0-SHA256SUMS.txt",
+      "id": 688782966,
+      "size": 201,
+      "digest": "sha256:0be3dd380cab8f74f21a2ceff67da0f5cac56b23c26ffb855dfb81315d3cf4cd"
+    },
+    {
+      "name": "cylon-raider-windows-v0.5.0-preliminary-SHA256SUMS.txt",
+      "id": 689260275,
+      "size": 566,
+      "digest": "sha256:2124a653583bb6a7265fbf640c6f42b062e823856762f6e3fc64697bd56cc32a"
+    },
+    {
+      "name": "CylonRaider-0.5.0-preliminary-BUILD-PROVENANCE.json",
+      "id": 689259553,
+      "size": 996,
+      "digest": "sha256:05351e8a77d558950844456e8b55fb6b9bd04fed1b6dba4283c5fc4c9eacb0fb"
+    },
+    {
+      "name": "CylonRaider-0.5.0-preliminary-READ-ME-FIRST.txt",
+      "id": 689259624,
+      "size": 699,
+      "digest": "sha256:3faeafb66e48edcd0f7be8beee845f38cef954a2b008dfd3b5d5bbb6f57aa441"
+    },
+    {
+      "name": "CylonRaider-Portable-0.5.0-preliminary-Windows-x64.zip",
+      "id": 689259697,
+      "size": 57898875,
+      "digest": "sha256:8da0c870f50b97dcf6e31cc21ef7f8e1b16b07be8fe3c3b74ba1bebb7dc5f41f"
+    },
+    {
+      "name": "CylonRaider-Setup-0.4.0.exe",
+      "id": 688782967,
+      "size": 42118460,
+      "digest": "sha256:5c1ab0cd34089ac5a16c51e1be1550b95c3ca8e6013fff198e23e3bdc6098c99"
+    },
+    {
+      "name": "CylonRaider-Setup-0.5.0-preliminary.exe",
+      "id": 689259989,
+      "size": 41429828,
+      "digest": "sha256:03d28df0802e904d8b336d43fafdb3e6d0d83c27d942c895cbd1ab1649ab1fe9"
+    },
+    {
+      "name": "CylonRaider-Source-0.5.0-preliminary.zip",
+      "id": 689260195,
+      "size": 925573,
+      "digest": "sha256:2be93ed484b3ba678aaebc51f6f0ef5f74b38dd37843782d5cf580b74ed85a18"
+    },
+    {
+      "name": "CylonRaider-Windows-0.4.0-Portable.zip",
+      "id": 688782968,
+      "size": 56894200,
+      "digest": "sha256:276706218a74de547daf7c727c4cb00f34c152da3020fd36d223e418cc099ddd"
+    }
+  ]
+}
