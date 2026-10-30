@@ -34,6 +34,9 @@ try {
     }
     Copy-Item README.md $Payload
     Copy-Item docs $Payload -Recurse -Force
+    # Keep the project grant separate from the runtime's LICENSE.txt.
+    Copy-Item (Join-Path $AppRoot '../LICENSE') (Join-Path $Payload 'LICENSE') -Force
+    Invoke-Checked python @('packaging/v01/collect_notices.py', '--payload', $Payload)
     $Iscc = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
     if (!(Test-Path $Iscc)) { throw 'The hosted Windows image must include Inno Setup 6' }
     Invoke-Checked $Iscc @("/DPayloadDir=$Payload", "/DOutputDirOverride=$Output", '/DAppVer=0.1.0', (Join-Path $PSScriptRoot 'installer.iss'))
@@ -43,7 +46,8 @@ try {
     Remove-Item (Join-Path $Payload 'portable.marker')
     # Export only the reviewed Cylon Detector material and its dedicated public recipe.
     # Git metadata, unrelated applications and local build files are excluded.
-    Invoke-Checked git @('-C', (Join-Path $AppRoot '../..'), 'archive', '--format=zip', "--output=$(Join-Path $Output 'CylonDetector-Source-0.1.0-initial.zip')", 'HEAD', 'Cylon-Detector/Windows', '.github/workflows/cylon-detector-v01.yml')
+    Invoke-Checked git @('-C', (Join-Path $AppRoot '../..'), 'archive', '--format=zip', "--output=$(Join-Path $Output 'CylonDetector-Source-0.1.0-initial.zip')", 'HEAD', 'Cylon-Detector/LICENSE', 'Cylon-Detector/Windows', '.github/workflows/cylon-detector-v01.yml')
+    Invoke-Checked python @('packaging/v01/collect_notices.py', '--source-zip', (Join-Path $Output 'CylonDetector-Source-0.1.0-initial.zip'))
     $RunUrl = "$env:GITHUB_SERVER_URL/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID"
     [ordered]@{
         version = '0.1.0-initial'
@@ -66,6 +70,7 @@ Cylon Detector observes microphone/camera access metadata available through Wind
 While monitoring, a five-minute network context buffer stays in RAM. By default, observed events select detail for the main local database with post-event context; continuous network detail is optional. Configurable interval summaries use separate report files.
 Detector captures no audio, video or packet contents and makes no external lookups or telemetry requests. Monitoring starts only when requested; optional startup and boot-service modes require explicit configuration.
 Verify SHA256SUMS.txt before testing. BUILD-PROVENANCE.json identifies the exact source and validation limits.
+LICENSE contains the project MIT grant; docs/THIRD-PARTY.md and docs/licenses contain dependency license texts and notices.
 This initial installer has no publisher code signature. Windows may show an unknown-publisher prompt.
 Keep a backup of important history before testing an initial version.
 '@

@@ -15,4 +15,4 @@ The Windows x64 installer is unsigned. Verified installer/source/checksum links 
 
 Build on a clean Windows host with .NET SDK 10.0.403, Python 3.13 and Inno Setup 6 using `./packaging/v01/build.ps1`. The dedicated workflow is `.github/workflows/cylon-detector-v01.yml`. Synthetic checks are separate from physical camera/microphone/ETW, installer lifecycle, boot and display-DPI acceptance. See [third-party notices](docs/THIRD-PARTY.md).
 
-Project-owned published material follows the existing [MIT License](../../LICENSE), subject to the third-party notices above. Local synthetic checks and partial Windows runs do not establish a completed release gate; final source/run evidence is pending.
+Project-owned published material follows the existing MIT License, subject to the third-party notices above. In the source tree, see [../LICENSE](../LICENSE); installed and portable packages include the exact grant as [LICENSE](LICENSE) beside this README and full dependency texts under [docs/licenses](docs/licenses). Local synthetic checks and partial Windows runs do not establish a completed release gate; final source/run evidence is pending.

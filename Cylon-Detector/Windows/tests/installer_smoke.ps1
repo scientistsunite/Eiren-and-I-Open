@@ -56,7 +56,7 @@ function Assert-NoLinks([string]$Path) {
     }
 }
 
-function Remove-OwnedTree([string]$Path, [string]$ExpectedPath) {
+function Remove-OwnedTreeOnce([string]$Path, [string]$ExpectedPath) {
     if (![IO.Path]::GetFullPath($Path).Equals([IO.Path]::GetFullPath($ExpectedPath), [StringComparison]::OrdinalIgnoreCase)) {
         throw 'Fixture cleanup target is outside its exact owned directory.'
     }
@@ -71,6 +71,35 @@ function Remove-OwnedTree([string]$Path, [string]$ExpectedPath) {
         }
     }
     Remove-Item -LiteralPath $Path -Recurse -Force
+}
+
+function Remove-OwnedTree([string]$Path, [string]$ExpectedPath) {
+    $Deadline = [Diagnostics.Stopwatch]::StartNew()
+    while ($true) {
+        try { Remove-OwnedTreeOnce $Path $ExpectedPath; return }
+        catch {
+            # Inno's temporary uninstaller can release/delete its original files
+            # just after its waiting launcher exits. Retry only filesystem races,
+            # never the explicit exact-path/reparse-point refusal exceptions.
+            $Transient = $_.Exception -is [IO.IOException] -or $_.Exception -is [UnauthorizedAccessException] -or
+                $_.CategoryInfo.Category -in @('ObjectNotFound', 'PermissionDenied', 'WriteError', 'ResourceBusy')
+            if (!$Transient -or $Deadline.Elapsed.TotalSeconds -ge 15) { throw }
+            Start-Sleep -Milliseconds 200
+        }
+    }
+}
+
+function Cleanup-Diagnostic([string]$Stage, [System.Management.Automation.ErrorRecord]$Record) {
+    # Preserve actionable error classification without emitting paths or inventory.
+    return "stage=$Stage category=$($Record.CategoryInfo.Category) type=$($Record.Exception.GetType().Name) hresult=$($Record.Exception.HResult)"
+}
+
+function Wait-DetectorUninstalled {
+    $Deadline = [Diagnostics.Stopwatch]::StartNew()
+    while ((Test-Path -LiteralPath $DetectorKey) -or (Test-Path -LiteralPath (Join-Path $InstallRoot 'CylonDetector.exe')) -or (Test-Path -LiteralPath $Shortcut)) {
+        if ($Deadline.Elapsed.TotalSeconds -ge 15) { throw 'Detector uninstaller did not finish removing its owned registration/application/shortcut within fifteen seconds.' }
+        Start-Sleep -Milliseconds 200
+    }
 }
 
 function Invoke-Installer([string]$Executable) {
@@ -213,6 +242,7 @@ try {
     Assert-True (!$Options.AutoMonitor -and $Options.Startup -eq 0) 'Fresh defaults retain monitoring off and boot/sign-in startup disabled.'
     $SavedFiles = @('history.db', 'options.json') | ForEach-Object { [ordered]@{ name=$_; hash=(Get-FileHash -LiteralPath (Join-Path $ProfileRoot $_) -Algorithm SHA256).Hash } }
     Invoke-Installer (Join-Path $InstallRoot 'unins000.exe')
+    Wait-DetectorUninstalled
     Assert-True (!(Test-Path -LiteralPath $DetectorKey) -and !(Test-Path -LiteralPath (Join-Path $InstallRoot 'CylonDetector.exe')) -and !(Test-Path -LiteralPath $Shortcut)) 'Silent uninstall removes Detector registration, installed UI and shortcut.'
     foreach ($Saved in $SavedFiles) {
         $Preserved = Join-Path $ProfileRoot $Saved.name
@@ -233,16 +263,28 @@ try {
         } catch { $CleanupFailures.Add('Fixture-owned UI process cleanup failed.') }
     }
     if ($InstallAttempted) {
+        $CleanupStage = 'installation-state'
         try {
-            if (Test-Path -LiteralPath (Join-Path $InstallRoot 'unins000.exe')) { Invoke-Installer (Join-Path $InstallRoot 'unins000.exe') }
+            # After the successful uninstall, its original EXE may briefly remain
+            # while self-deletion completes. Do not launch that EXE a second time.
+            $Installed = Test-Path -LiteralPath $DetectorKey
+            if ($Installed -and (Test-Path -LiteralPath (Join-Path $InstallRoot 'unins000.exe'))) {
+                $CleanupStage = 'owned-uninstaller'
+                Invoke-Installer (Join-Path $InstallRoot 'unins000.exe')
+            }
+            $CleanupStage = 'uninstall-completion'
+            Wait-DetectorUninstalled
+            $CleanupStage = 'registration-absence'
             if ((Test-Path -LiteralPath $DetectorKey) -or (Test-Path -LiteralPath $DetectorService)) { throw 'Detector registration remains; no recursive installation cleanup was attempted.' }
+            $CleanupStage = 'owned-install-tree'
             Remove-OwnedTree $InstallRoot (Join-Path $env:ProgramFiles 'Cylon Detector')
+            $CleanupStage = 'owned-shortcut'
             if (Test-Path -LiteralPath $Shortcut) { Assert-NoLinks $Shortcut; Remove-Item -LiteralPath $Shortcut -Force }
-        } catch { $CleanupFailures.Add('Fixture-owned installation cleanup failed; review disposable runner outcome.') }
+        } catch { $CleanupFailures.Add('Fixture-owned installation cleanup failed: ' + (Cleanup-Diagnostic $CleanupStage $_)) }
     }
     if ($ProfileOwned) {
         try { Remove-OwnedTree $ProfileRoot (Join-Path $env:LOCALAPPDATA 'EirenAndI/CylonDetector') }
-        catch { $CleanupFailures.Add('Fixture-created Detector profile cleanup failed.') }
+        catch { $CleanupFailures.Add('Fixture-created Detector profile cleanup failed: ' + (Cleanup-Diagnostic 'owned-profile-tree' $_)) }
     }
     foreach ($RuleName in $FixtureRuleNames) {
         try { Get-NetFirewallRule -Name $RuleName -ErrorAction SilentlyContinue | Remove-NetFirewallRule -ErrorAction Stop }
