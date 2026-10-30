@@ -17,4 +17,4 @@ Use the prerelease Windows x64 installer for a normal installation; it retains t
 
 Build: `.github/workflows/cylon-raider-v052-prerelease.yml`, Windows hosted runner, .NET SDK 10.0.403, Inno Setup 6, Python 3.13. Run `./packaging/v052/build.ps1` from a clean Windows checkout. Outputs include installer, portable archive, source archive, SHA256 checksums and build provenance. The workflow does not install the application or register a service.
 
-See [v0.5.2 changes](docs/v052/CHANGES.md), [UI action mapping and validation](docs/v05/UI-REVIEW.md) and [distribution notices](docs/THIRD-PARTY.md). Application source and artwork remain copyright Eiren & I Apps; no new open-source reuse license is granted.
+See [v0.5.2 changes](docs/v052/CHANGES.md), [UI action mapping and validation](docs/v05/UI-REVIEW.md) and [distribution notices](docs/THIRD-PARTY.md). Project-owned application source and original artwork are offered under the [MIT License](../LICENSE), subject to [third-party notices](docs/THIRD-PARTY.md). Earlier downloaded packages retain their included notices; no binary or archive is altered by this documentation update.
