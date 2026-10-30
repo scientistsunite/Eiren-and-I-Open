@@ -6,6 +6,6 @@ With Continue in tray enabled, × hides the application window and monitoring co
 
 All v0.5.1 UI features are retained. Capture, measurement, history, storage, report, collector and service implementations are unchanged. Version provenance identifies v0.5.2. The installer retains the existing application ID and preserves data by default.
 
-The Windows recipe runs both the existing 3,916 unified UI regressions and the targeted 53-check native tray-close regression. The latter checks actual native visibility and stable window handles in normal/maximized/minimized states on Dashboard, Monitoring and History, plus tray restoration and maximized-state preservation.
+The Windows recipe runs both the existing 3,916 unified UI regressions and the targeted 52-check native tray-close regression. The latter checks actual native visibility and stable window handles in normal/maximized/minimized states on Dashboard, Monitoring and History, plus tray restoration and maximized-state preservation.
 
 Unsigned Windows x64 prerelease for testing. Hosted synthetic checks do not establish physical M7/4K/DPI, real ETW, boot-service, multi-monitor or installer lifecycle/upgrade acceptance.
