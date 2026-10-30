@@ -4,8 +4,6 @@ on:
   push:
     branches: [cylon-raider-v051]
     paths: ['Cylon-Raider/**', '.github/workflows/cylon-raider-v051-prerelease.yml']
-  pull_request:
-    paths: ['Cylon-Raider/**', '.github/workflows/cylon-raider-v051-prerelease.yml']
   workflow_dispatch:
 
 permissions:

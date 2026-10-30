@@ -59,3 +59,19 @@ Public shared memory was reviewed. Status is recorded here within the authorized
 - Fix: retain the main window's default taskbar style and use Hide/Show directly for tray close, automatic tray startup and restoration. Hidden windows are already excluded from the taskbar. No monitoring, collector, history, storage, report or service behavior changes.
 - New targeted native regression reads user32 IsWindowVisible and compares HWND identity, alongside managed visibility, for normal/maximized/minimized windows on three sections. It also checks one managed top-level form, actual tray left-click restoration and window-state preservation. Existing explicit one-close shutdown remains covered.
 - Post-fix Windows [run 40951110076](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40951110076), source `a201d8b0537b0dc72c35b0b01a262fbacc9dcd58`, passed both the targeted native matrix and the existing unified UI regressions. All nine tray-close cases report managedVisible=false, nativeVisible=false, recreated=false, disposed=false. Tray restoration and maximized-state preservation passed, alongside the existing one-close actual shutdown and all 3,916 unified UX checks. Compilation also passed with zero warnings/errors. No installer, published release or release asset was changed by this investigation.
+
+
+## 2026-10-29 — Owner-authorized v0.5.2 prerelease
+
+- User merged PR #4 and explicitly requested a new v0.5.2 prerelease installer under the existing Cylon Raider — Windows collection.
+- Packaging is based on merged public main `776d6c1`; the tray-close fix is retained unchanged. Only version provenance, versioned build recipes and app documentation change for this build. Capture/history/storage/reports/collector/service implementations are unchanged.
+- The versioned Windows workflow runs all existing deterministic/native suites and the additional 53-check native tray-close probe before self-contained publishing and Inno Setup compilation. Build and publication evidence are pending.
+- Publication must append version-specific files and retain all 15 existing assets and the historical tag. No other application or release is in scope.
+
+
+### Verified v0.5.2 build
+
+- Source `36e4d96f8ed4933c108f942c5cd7a81da7bc840b`; [Windows run 40952435191](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/40952435191) passed all existing measurement/history/quality/native suites, 3,916 unified UI checks and the targeted tray-close matrix, then self-contained publishing and installer compilation.
+- All nine normal/maximized/minimized tray cases remain natively hidden without handle recreation; tray restoration and actual one-close shutdown passed. Application implementation changes from the merged fix are limited to version provenance and About text.
+- Installer SHA256 `494d724f7f10707253028822b11f43776e9177654ca64b33f712acda5a48efd3`. Source, package hashes and validation limits are recorded in `Windows/docs/v052/BUILD-RESULTS.md`.
+- The dedicated publisher pins this exact successful artifact and preserves all 15 existing downloads and the historical tag. Publication succeeded in run 40953046225; run 40953323784 retained the same verified files and corrected the release-note count to the 52 targeted assertions logged by this versioned run. All 15 earlier files and six additions were downloaded and hash-verified, and a separate public installer download matched its build hash. Receipt: `Release-Tools/v052/publication-40953323784.json`. Physical-device, real ETW, boot-service and installer lifecycle/upgrade acceptance remain outstanding.

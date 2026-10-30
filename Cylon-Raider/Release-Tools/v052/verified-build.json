@@ -1,0 +1,13 @@
+{
+  "SOURCE_SHA": "36e4d96f8ed4933c108f942c5cd7a81da7bc840b",
+  "RUN_ID": 40952435191,
+  "ARTIFACT_ID": 12931728476,
+  "ARTIFACT_NAME": "CylonRaider-0.5.2-prerelease-Windows-x64",
+  "ARTIFACT_SHA": "358731c5cd9d494f1a7fbb3536cfaf4daef3b7dd02b7e66892e7660b40816c80",
+  "ARTIFACT_SIZE": 99568536,
+  "PINNED_PAYLOADS": {
+    "CylonRaider-Portable-0.5.2-prerelease-Windows-x64.zip": "c011163ec5280e4891a81a646be746468b0b39abe22806c33f2c12571a14b488",
+    "CylonRaider-Setup-0.5.2-prerelease.exe": "494d724f7f10707253028822b11f43776e9177654ca64b33f712acda5a48efd3",
+    "CylonRaider-Source-0.5.2-prerelease.zip": "f43cbcfc385e4df9003f65fd683210febbaf851f74a18fe961d34b581da8b4fa"
+  }
+}

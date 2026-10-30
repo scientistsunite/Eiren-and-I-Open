@@ -7,7 +7,7 @@ using Raider.History;
 namespace Raider.App;
 internal static class PlatformPaths
 {
-    public const string WindowTitle="Cylon Raider v0.5.1";
+    public const string WindowTitle="Cylon Raider v0.5.2";
     public const int RestoreMessage=0x8000+42, ShutdownMessage=0x8000+43;
     public static bool Installed=>File.Exists(Path.Combine(AppContext.BaseDirectory,"installed.marker"));
     public static string DataRoot {

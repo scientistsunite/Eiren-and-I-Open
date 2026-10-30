@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "repository": "scientistsunite/Eiren-and-I-Open",
+  "release_id": 427955131,
+  "title": "Cylon Raider — Windows",
+  "release_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-raider-windows-v0.4.0",
+  "tag": "cylon-raider-windows-v0.4.0",
+  "tag_sha": "3f15a615e9cc1a09692abbdb8d4a183eadccf43e",
+  "prerelease": true,
+  "immutable": false,
+  "source_sha": "36e4d96f8ed4933c108f942c5cd7a81da7bc840b",
+  "build_run": 40952435191,
+  "artifact_id": 12931728476,
+  "publisher_run": 40953046225,
+  "evidence_note_update_run": 40953323784,
+  "assets": [
+    {
+      "id": 688782966,
+      "name": "cylon-raider-windows-v0.4.0-SHA256SUMS.txt",
+      "size": 201,
+      "sha256": "0be3dd380cab8f74f21a2ceff67da0f5cac56b23c26ffb855dfb81315d3cf4cd",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.4.0-SHA256SUMS.txt"
+    },
+    {
+      "id": 689260275,
+      "name": "cylon-raider-windows-v0.5.0-preliminary-SHA256SUMS.txt",
+      "size": 566,
+      "sha256": "2124a653583bb6a7265fbf640c6f42b062e823856762f6e3fc64697bd56cc32a",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.5.0-preliminary-SHA256SUMS.txt"
+    },
+    {
+      "id": 689700187,
+      "name": "cylon-raider-windows-v0.5.1-prerelease-SHA256SUMS.txt",
+      "size": 561,
+      "sha256": "156cd5195e572713fa2a0ae2d3eaa5b7437c98af1b8939e6dacb7f5d4c471e1b",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.5.1-prerelease-SHA256SUMS.txt"
+    },
+    {
+      "id": 689878071,
+      "name": "cylon-raider-windows-v0.5.2-prerelease-SHA256SUMS.txt",
+      "size": 561,
+      "sha256": "d6ce668229e4916539ae8cbbc69772b7cbd61349b278d97f9155cc1a3e44518f",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/cylon-raider-windows-v0.5.2-prerelease-SHA256SUMS.txt"
+    },
+    {
+      "id": 689259553,
+      "name": "CylonRaider-0.5.0-preliminary-BUILD-PROVENANCE.json",
+      "size": 996,
+      "sha256": "05351e8a77d558950844456e8b55fb6b9bd04fed1b6dba4283c5fc4c9eacb0fb",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.0-preliminary-BUILD-PROVENANCE.json"
+    },
+    {
+      "id": 689259624,
+      "name": "CylonRaider-0.5.0-preliminary-READ-ME-FIRST.txt",
+      "size": 699,
+      "sha256": "3faeafb66e48edcd0f7be8beee845f38cef954a2b008dfd3b5d5bbb6f57aa441",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.0-preliminary-READ-ME-FIRST.txt"
+    },
+    {
+      "id": 689699838,
+      "name": "CylonRaider-0.5.1-prerelease-BUILD-PROVENANCE.json",
+      "size": 995,
+      "sha256": "bc6af44f6a5af26d8935abbfe18b3f8be364bc717de858d6d2e5cb69a09e65e2",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.1-prerelease-BUILD-PROVENANCE.json"
+    },
+    {
+      "id": 689699867,
+      "name": "CylonRaider-0.5.1-prerelease-READ-ME-FIRST.txt",
+      "size": 695,
+      "sha256": "afe091a4a49128aec171a9b8196c0b144cfa8bc4c8246d5275b3255174bd574e",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.1-prerelease-READ-ME-FIRST.txt"
+    },
+    {
+      "id": 689877360,
+      "name": "CylonRaider-0.5.2-prerelease-BUILD-PROVENANCE.json",
+      "size": 1101,
+      "sha256": "b4c21679146ac46dc3a6513880627c014bc3764c1bc42dc8cb48448e8f5f40e3",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.2-prerelease-BUILD-PROVENANCE.json"
+    },
+    {
+      "id": 689877487,
+      "name": "CylonRaider-0.5.2-prerelease-READ-ME-FIRST.txt",
+      "size": 751,
+      "sha256": "846d14ac1ed3cf56d2fa22e35acceb434ccacf5234eaaceb98aedc89a0034636",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-0.5.2-prerelease-READ-ME-FIRST.txt"
+    },
+    {
+      "id": 689259697,
+      "name": "CylonRaider-Portable-0.5.0-preliminary-Windows-x64.zip",
+      "size": 57898875,
+      "sha256": "8da0c870f50b97dcf6e31cc21ef7f8e1b16b07be8fe3c3b74ba1bebb7dc5f41f",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Portable-0.5.0-preliminary-Windows-x64.zip"
+    },
+    {
+      "id": 689699916,
+      "name": "CylonRaider-Portable-0.5.1-prerelease-Windows-x64.zip",
+      "size": 57903251,
+      "sha256": "99dc67c2b409620bf899369d058f3b601ef65812940466feb2de9164f0583104",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Portable-0.5.1-prerelease-Windows-x64.zip"
+    },
+    {
+      "id": 689877544,
+      "name": "CylonRaider-Portable-0.5.2-prerelease-Windows-x64.zip",
+      "size": 57905738,
+      "sha256": "c011163ec5280e4891a81a646be746468b0b39abe22806c33f2c12571a14b488",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Portable-0.5.2-prerelease-Windows-x64.zip"
+    },
+    {
+      "id": 688782967,
+      "name": "CylonRaider-Setup-0.4.0.exe",
+      "size": 42118460,
+      "sha256": "5c1ab0cd34089ac5a16c51e1be1550b95c3ca8e6013fff198e23e3bdc6098c99",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.4.0.exe"
+    },
+    {
+      "id": 689259989,
+      "name": "CylonRaider-Setup-0.5.0-preliminary.exe",
+      "size": 41429828,
+      "sha256": "03d28df0802e904d8b336d43fafdb3e6d0d83c27d942c895cbd1ab1649ab1fe9",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.0-preliminary.exe"
+    },
+    {
+      "id": 689700035,
+      "name": "CylonRaider-Setup-0.5.1-prerelease.exe",
+      "size": 41437018,
+      "sha256": "1c8998c80a1b4d3c2f598caf53e58edd728ce8010166630925a710e6692bed40",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.1-prerelease.exe"
+    },
+    {
+      "id": 689877753,
+      "name": "CylonRaider-Setup-0.5.2-prerelease.exe",
+      "size": 41433936,
+      "sha256": "494d724f7f10707253028822b11f43776e9177654ca64b33f712acda5a48efd3",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Setup-0.5.2-prerelease.exe"
+    },
+    {
+      "id": 689260195,
+      "name": "CylonRaider-Source-0.5.0-preliminary.zip",
+      "size": 925573,
+      "sha256": "2be93ed484b3ba678aaebc51f6f0ef5f74b38dd37843782d5cf580b74ed85a18",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Source-0.5.0-preliminary.zip"
+    },
+    {
+      "id": 689700145,
+      "name": "CylonRaider-Source-0.5.1-prerelease.zip",
+      "size": 937532,
+      "sha256": "ff17749f8e24e06a5d7d7e7c579bf5c20c87cd5d65e9b03fd69a3c7b180f587c",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Source-0.5.1-prerelease.zip"
+    },
+    {
+      "id": 689877946,
+      "name": "CylonRaider-Source-0.5.2-prerelease.zip",
+      "size": 948827,
+      "sha256": "f43cbcfc385e4df9003f65fd683210febbaf851f74a18fe961d34b581da8b4fa",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Source-0.5.2-prerelease.zip"
+    },
+    {
+      "id": 688782968,
+      "name": "CylonRaider-Windows-0.4.0-Portable.zip",
+      "size": 56894200,
+      "sha256": "276706218a74de547daf7c727c4cb00f34c152da3020fd36d223e418cc099ddd",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-raider-windows-v0.4.0/CylonRaider-Windows-0.4.0-Portable.zip"
+    }
+  ]
+}
