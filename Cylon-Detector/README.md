@@ -1,11 +1,5 @@
 # Cylon Detector
 
-**Public status:** placeholder only. No application source code, installers, binaries, releases, or previous development history have been published here.
+A Windows x64 privacy-awareness application derived from the owner-authorized Cylon Raider 0.5.2 network/storage/UI components. Detector adds observable microphone and camera activity metadata, a five-minute network RAM buffer, event-triggered network history and local activity/anomaly summaries. It is independently installable from Raider.
 
-## Reserved platforms
-
-- [Windows](Windows/) — placeholder, not a support commitment.
-- [Ubuntu](Ubuntu/) — placeholder, not a support commitment.
-- [macOS](macOS/) — placeholder, not a support commitment.
-
-Record approved decisions in [PROJECT_MEMORY.md](PROJECT_MEMORY.md) and use the [shared testing policy](../testing/TEST_POLICY.md). Review source, credentials, dependencies, and licensing before any implementation is added.
+See [Windows documentation](Windows/README.md). Windows 0.1 source and packaging passed the [complete hosted Windows build](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/41064238823) at `05b362909d5eb6714cad385c2b0eb77b94f372a2`; the [initial Windows x64 prerelease](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-detector-windows-v0.1.0) is published with an [installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Setup-0.1.0-initial.exe), [source archive](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Source-0.1.0-initial.zip) and [checksums](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/cylon-detector-windows-v0.1.0-initial-SHA256SUMS.txt). Ubuntu and macOS remain placeholders. Project-owned source and artwork follow the existing [MIT License](LICENSE), subject to [third-party notices](Windows/docs/THIRD-PARTY.md).

@@ -1,0 +1,32 @@
+{
+  "source_sha": "05b362909d5eb6714cad385c2b0eb77b94f372a2",
+  "run_id": 41064238823,
+  "artifact": {
+    "id": 12982522119,
+    "name": "CylonDetector-0.1.0-initial-Windows-x64",
+    "size": 99727535,
+    "sha256": "9c440edbddc17e6499f8e4e0c22c53b948c283bf45968e4d2f2ecd5717b640c5"
+  },
+  "payload_sha256": {
+    "CylonDetector-Portable-0.1.0-initial-Windows-x64.zip": "9c5408bff0ac37937e0d5b2e9d3b27151f2c4acf19ab68745a81da29e300c3ec",
+    "CylonDetector-Setup-0.1.0-initial.exe": "bfcf58c4d61f6b9baf4dc7d4118708b2381c754056f549af97f9a8d598741eb8",
+    "CylonDetector-Source-0.1.0-initial.zip": "23247c6c933425545195a93f28aa5112f84a4044d3bf5c29b47e3ee90fd314de"
+  },
+  "validation": {
+    "Measurement": 19,
+    "History": 66,
+    "Quality": 76,
+    "Native UI": 78,
+    "Unified UX": 4897,
+    "Sensor metadata": 19,
+    "Privacy policy": 921,
+    "Identity isolation": 10,
+    "Summary reports": 21,
+    "Tray close and restore": 61,
+    "Source guards": 2,
+    "Runtime source files checked": 51,
+    "Dependency package notices": 20,
+    "Hosted installer lifecycle fixture": 1,
+    "Publisher guards": 16
+  }
+}

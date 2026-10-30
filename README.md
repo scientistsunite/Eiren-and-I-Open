@@ -1,32 +1,34 @@
 # Eiren & I Open
 
-Public home for Eiren & I software projects.
+Public home for Eiren & I software projects. **Purpose and availability are different:** some applications have public source, some have downloadable releases without the matching source trees here, and some remain concepts.
 
-> **Status:** repository scaffolding only. No application source, installers, binaries, or private Git history have been imported. Platform folders are placeholders, not claims of product support.
+## Applications and intended uses
 
-## Applications
-
-| Application | Directory | Status |
+| Application | Intended use | Public repository status |
 | --- | --- | --- |
-| Archive Reader | [Archive-Reader](Archive-Reader/) | Placeholder |
-| Battery Charge Control | [Battery-Charge-Control](Battery-Charge-Control/) | Placeholder |
-| Silent Meteor | [Silent-Meteor](Silent-Meteor/) | Placeholder |
-| System Chronicle | [System-Chronicle](System-Chronicle/) | Placeholder |
-| Cylon Raider | [Cylon-Raider](Cylon-Raider/) | Placeholder |
-| Cylon Detector | [Cylon-Detector](Cylon-Detector/) | Placeholder |
+| [Archive Reader](Archive-Reader/) | Browse and search locally exported ChatGPT conversation archives, including large histories and paginated results. | Windows and Ubuntu packages in [Releases](https://github.com/scientistsunite/Eiren-and-I-Open/releases); source tree remains a placeholder. |
+| [Battery Charge Control](Battery-Charge-Control/) | Monitor laptop battery state and, on explicitly supported devices, control charging thresholds with restoration safeguards. | Experimental [Windows v0.1 source](Battery-Charge-Control/Windows/) is public; Ubuntu installer archive is in Releases, but its source is not in this tree. **No unverified firmware execution.** |
+| [Silent Meteor](Silent-Meteor/) | Customize idle-display/screensaver visuals with meteor animations and supported images or videos. | Windows and Ubuntu releases; source tree remains a placeholder. |
+| [System Chronicle](System-Chronicle/) | Record local performance and thermal readings to investigate heat, load, and resource-use trends. | Windows and Ubuntu releases; source tree remains a placeholder. |
+| [Cylon Raider](Cylon-Raider/) | Observe per-application network traffic, activity history and reports while keeping the monitor itself network-isolated. | [Windows source and prerelease tooling](Cylon-Raider/Windows/) are public, as are Windows prerelease downloads. |
+| [Cylon Detector](Cylon-Detector/) | Review observable microphone/camera application-use metadata, correlated network activity and unusual-behavior indicators, without recording device contents or declaring malware. | [Windows 0.1 source and build tooling](Cylon-Detector/Windows/) passed [hosted Windows CI](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/41064238823); the [initial Windows x64 prerelease](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-detector-windows-v0.1.0) provides installer, portable, source and checksum downloads. |
 
-Each application has a public `PROJECT_MEMORY.md` and reserved Windows, Ubuntu, and macOS folders. Future platform scope will be decided per application.
+Having a release download does not mean corresponding source is included in the current `main` tree, or that the application is production-certified. Consult individual app READMEs and the [Releases page](https://github.com/scientistsunite/Eiren-and-I-Open/releases) for exact features, assets, checksums and limitations.
+
+## Licensing
+
+The **[repository-wide MIT License](LICENSE)** covers original project-owned material throughout this public repository, including our six applications, shared scripts, tests, workflows, and documentation. All six application directories retain their identical MIT licenses; Battery Charge Control Windows also retains its matching [component license](Battery-Charge-Control/Windows/LICENSE).
+
+The [licensing scope and historical-release statement](LICENSING.md) **expressly offers MIT permission for project-owned original material in all GitHub Release downloads, including previously published versions**, even when the corresponding source is not in `main`. This does not relicense third-party components, replace their conditions or notices, or change the release package bytes, descriptions, tags or checksums.
+
+A public download does not establish rights to third-party material. New releases still require provenance, dependency, third-party-notice and platform-specific testing reviews.
 
 ## Shared development
 
-- [AGENTS.md](AGENTS.md) — instructions for public-repository work.
-- [SHARED_MEMORY.md](SHARED_MEMORY.md) — public cross-project decisions.
-- [MEMORY_SYNC.md](MEMORY_SYNC.md) — protocol for public memory updates.
-- [testing/](testing/) — test policy, matrix, reusable scripts, and fixture guidance.
-- [.github/workflows/](.github/workflows/) — public CI configuration.
+- [AGENTS.md](AGENTS.md) — instructions and public-only safeguards.
+- [SHARED_MEMORY.md](SHARED_MEMORY.md) and [MEMORY_SYNC.md](MEMORY_SYNC.md) — public decisions.
+- [testing/](testing/) — tests, matrix, fixtures and shared policy.
+- [.github/workflows/](.github/workflows/) — public CI.
+- [scripts/](scripts/) — reviewable public release-note maintenance.
 
-## Privacy and licensing
-
-All branches, pull requests, workflows, and artifacts in this public repository should be treated as public. Do not transfer private repository files, histories, logs, credentials, or other unapproved materials here. Only add specifically approved, publication-reviewed content.
-
-**No open-source license has yet been chosen.** Public visibility alone does not grant others permission to reuse or redistribute code. Licensing must be decided before publishing application implementations.
+All branches, pull requests and workflows here are public. Do not import private Git history, personal data, credentials, recordings or unreviewed assets.

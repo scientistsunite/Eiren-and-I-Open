@@ -28,4 +28,4 @@ Applies to this entire **public** repository.
 
 ## Initial state
 
-Six application roots and Windows/Ubuntu/macOS directories are placeholders only. No implementation, release, platform support, or licensing is implied.
+Initial scaffolding had only placeholders. BCC Windows now has a reviewed experimental **source-only** implementation with an application-scoped license; no executable, hardware acceptance, or production support is implied. Cylon Raider Windows also has public prerelease source and build tooling. Some other app families have historical releases even though their Git trees remain placeholders. Each of the six application directories now has an app-scoped MIT license for project-owned material, subject to third-party and older-release rights.

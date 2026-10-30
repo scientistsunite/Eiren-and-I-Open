@@ -1,0 +1,7 @@
+SIMULATION ONLY — DISPOSABLE WINDOWS 11 VM TEST FIXTURE
+
+This is a separate non-elevated test installation. It does not install Battery Charge Control, a controller, a driver, or a service. It contains synthetic telemetry only. No real battery or firmware is accessed. Do not confuse it with the production installer. Installation, modification, repair, and removal of this fixture cannot establish that production installer actions work.
+
+Review its source and safeguards before execution. Run only in a disposable Windows 11 VM under a standard account. Revert the VM snapshot afterward. No installer is executed by CI.
+
+The production application's charging limitations remain important: a firmware setting can persist across alternate boot sources, including Linux, another Windows installation, and external drives. Shutdown restoration is best-effort, never guaranteed after a crash, power loss, hibernation, Fast Startup, or driver/firmware failure. Never assume an unknown original limit was 100%. Firmware acknowledgment and matching readback do not prove physical charging cutoff. Explicit informed consent remains required before production charging changes.
