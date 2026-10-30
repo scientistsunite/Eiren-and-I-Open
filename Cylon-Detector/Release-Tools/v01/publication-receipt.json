@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "description": "Curated public verification summary; full before/after inventories and publisher receipt are retained in the linked Actions artifact.",
+  "release": {
+    "id": 429084349,
+    "name": "Cylon Detector — Windows",
+    "url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-detector-windows-v0.1.0",
+    "tag": "cylon-detector-windows-v0.1.0",
+    "source_sha": "05b362909d5eb6714cad385c2b0eb77b94f372a2",
+    "published_at": "2026-10-30T13:55:17Z",
+    "draft": false,
+    "prerelease": true
+  },
+  "verified_build": {
+    "source_sha": "05b362909d5eb6714cad385c2b0eb77b94f372a2",
+    "run_id": 41064238823,
+    "artifact": {
+      "id": 12982522119,
+      "name": "CylonDetector-0.1.0-initial-Windows-x64",
+      "size": 99727535,
+      "sha256": "9c440edbddc17e6499f8e4e0c22c53b948c283bf45968e4d2f2ecd5717b640c5"
+    },
+    "payload_sha256": {
+      "CylonDetector-Portable-0.1.0-initial-Windows-x64.zip": "9c5408bff0ac37937e0d5b2e9d3b27151f2c4acf19ab68745a81da29e300c3ec",
+      "CylonDetector-Setup-0.1.0-initial.exe": "bfcf58c4d61f6b9baf4dc7d4118708b2381c754056f549af97f9a8d598741eb8",
+      "CylonDetector-Source-0.1.0-initial.zip": "23247c6c933425545195a93f28aa5112f84a4044d3bf5c29b47e3ee90fd314de"
+    },
+    "validation": {
+      "Measurement": 19,
+      "History": 66,
+      "Quality": 76,
+      "Native UI": 78,
+      "Unified UX": 4897,
+      "Sensor metadata": 19,
+      "Privacy policy": 921,
+      "Identity isolation": 10,
+      "Summary reports": 21,
+      "Tray close and restore": 61,
+      "Source guards": 2,
+      "Runtime source files checked": 51,
+      "Dependency package notices": 20,
+      "Hosted installer lifecycle fixture": 1,
+      "Publisher guards": 16
+    }
+  },
+  "publisher": {
+    "source_sha": "47d642d46cd35205782f605b81ac2a2c5d5f702f",
+    "run_id": 41067141042,
+    "job_id": 124101401262,
+    "tests_passed": 24,
+    "conclusion": "success",
+    "receipt_artifact": {
+      "id": 12983900375,
+      "name": "CylonDetector-v01-publication-receipt-attempt-1",
+      "size": 19349,
+      "sha256": "aceae9c422cca82251dd6f40f5687a663b2fc0f0a14121a424594f8517d64599",
+      "url": "https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/41067141042/artifacts/12983900375"
+    },
+    "other_release_metadata_and_assets_preserved_during_publication": true,
+    "other_tag_objects_preserved_during_publication": true,
+    "all_six_asset_downloads_hashed_before_and_after_publication": true
+  },
+  "independent_public_checks": {
+    "anonymous_installer_download_sha256": "bfcf58c4d61f6b9baf4dc7d4118708b2381c754056f549af97f9a8d598741eb8",
+    "anonymous_source_download_sha256": "23247c6c933425545195a93f28aa5112f84a4044d3bf5c29b47e3ee90fd314de",
+    "both_match_public_checksum_manifest": true,
+    "seven_complete_license_texts_match_source_after_line_ending_normalization": true
+  },
+  "assets": [
+    {
+      "id": 692281219,
+      "name": "cylon-detector-windows-v0.1.0-initial-SHA256SUMS.txt",
+      "size": 556,
+      "digest": "sha256:57a3e32208eaa2d7b55b3669db26e0d0fa4ee07f1e05844e1fa7b5fbd833e6e7",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/cylon-detector-windows-v0.1.0-initial-SHA256SUMS.txt"
+    },
+    {
+      "id": 692280248,
+      "name": "CylonDetector-0.1.0-initial-BUILD-PROVENANCE.json",
+      "size": 1612,
+      "digest": "sha256:18ba8923f47c8a8613b57acca03f8fb6097cb4c030f88063a1a2230bebf53981",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-0.1.0-initial-BUILD-PROVENANCE.json"
+    },
+    {
+      "id": 692280383,
+      "name": "CylonDetector-0.1.0-initial-READ-ME-FIRST.txt",
+      "size": 1457,
+      "digest": "sha256:a115ac79aa91b01eb72e87bf1c457372dde62b6199de45f65f8be10677826b28",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-0.1.0-initial-READ-ME-FIRST.txt"
+    },
+    {
+      "id": 692280476,
+      "name": "CylonDetector-Portable-0.1.0-initial-Windows-x64.zip",
+      "size": 58061102,
+      "digest": "sha256:9c5408bff0ac37937e0d5b2e9d3b27151f2c4acf19ab68745a81da29e300c3ec",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Portable-0.1.0-initial-Windows-x64.zip"
+    },
+    {
+      "id": 692280780,
+      "name": "CylonDetector-Setup-0.1.0-initial.exe",
+      "size": 41481582,
+      "digest": "sha256:bfcf58c4d61f6b9baf4dc7d4118708b2381c754056f549af97f9a8d598741eb8",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Setup-0.1.0-initial.exe"
+    },
+    {
+      "id": 692281131,
+      "name": "CylonDetector-Source-0.1.0-initial.zip",
+      "size": 987918,
+      "digest": "sha256:23247c6c933425545195a93f28aa5112f84a4044d3bf5c29b47e3ee90fd314de",
+      "download_url": "https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Source-0.1.0-initial.zip"
+    }
+  ],
+  "unchanged_other_app_source_trees": {
+    "Archive-Reader": "43369abb4c632034e09fe183ac988b167dfad261",
+    "Battery-Charge-Control": "8632e7d004aac1b05aa1057bc8d039fe8849d05d",
+    "Silent-Meteor": "7af6d7184c84beb79f131539eb8bdf13d997e491",
+    "System-Chronicle": "032f17acadc8644cd41b868846b3114400d531c3",
+    "Cylon-Raider": "ecc8a161d09b8942ceaa10afb21a3bf43b8a2bcb"
+  },
+  "source_tree_comparison_base": "0b1a292d340e72a0d0852eb164975b02497bb736"
+}

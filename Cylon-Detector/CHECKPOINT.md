@@ -1,3 +1,9 @@
+# Current status — 2026-10-30
+
+The historical checkpoint below is preserved as a record, not current resume instructions. Implementation PR #8 was squash-merged as `05b362909d5eb6714cad385c2b0eb77b94f372a2`; [main Windows run 41064238823](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/41064238823) passed all required checks and the hosted installer fixture through cleanup. The [initial Windows x64 prerelease](https://github.com/scientistsunite/Eiren-and-I-Open/releases/tag/cylon-detector-windows-v0.1.0) is published; [publication run 41067141042](https://github.com/scientistsunite/Eiren-and-I-Open/actions/runs/41067141042) verified all six final downloads and preservation inventories for other releases/assets/tags. The [installer](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Setup-0.1.0-initial.exe), [source](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/CylonDetector-Source-0.1.0-initial.zip) and [checksums](https://github.com/scientistsunite/Eiren-and-I-Open/releases/download/cylon-detector-windows-v0.1.0/cylon-detector-windows-v0.1.0-initial-SHA256SUMS.txt) are available. Current build evidence, counts and limitations are recorded in [PROJECT_MEMORY.md](PROJECT_MEMORY.md). Release pins and final publication receipts are maintained separately under `Release-Tools/v01/`.
+
+---
+
 # Safe development checkpoint — 2026-10-30
 
 The user requested this checkpoint before the session usage limit. Resume the existing work; do not restart the implementation. No Detector release or tag has been published and no implementation PR has been merged yet.
