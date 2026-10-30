@@ -16,6 +16,7 @@ import re
 import shutil
 import stat
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -119,12 +120,15 @@ def validate_tag(config: dict, tag: dict) -> None:
     require(tag.get("ref") == "refs/tags/" + TAG and tag.get("object", {}).get("type") == "commit" and tag.get("object", {}).get("sha") == config["source_sha"], "Existing Detector tag is not the exact pinned source")
 
 
-def validate_release(config: dict, release: dict, hashes: dict[str, str], allow_draft: bool = True) -> dict[str, dict]:
+def _validate_release_metadata(config: dict, release: dict, allow_draft: bool = True) -> None:
     require(positive_int(release.get("id")), "Invalid release ID")
     require(release.get("tag_name") == TAG and release.get("target_commitish") == config["source_sha"], "Existing Detector release source/tag mismatch")
     require(release.get("name") == TITLE and release.get("body") == build_body(config), "Existing Detector release notes/title mismatch")
     require(release.get("immutable") is False and release.get("prerelease") is True and type(release.get("draft")) is bool, "Unexpected release immutability/prerelease/draft state")
     require(allow_draft or release["draft"] is False, "Release is not published")
+
+
+def _validate_asset_inventory(release: dict, hashes: dict[str, str]) -> dict[str, dict]:
     assets = release.get("assets")
     require(isinstance(assets, list), "Missing Detector asset inventory")
     inventory: dict[str, dict] = {}
@@ -134,6 +138,12 @@ def validate_release(config: dict, release: dict, hashes: dict[str, str], allow_
         require(asset.get("state") == "uploaded" and positive_int(asset.get("id")) and positive_int(asset.get("size")), "Incomplete Detector asset")
         require(asset.get("digest") == "sha256:" + hashes[name], f"Existing Detector asset collision: {name}")
         inventory[name] = asset
+    return inventory
+
+
+def validate_release(config: dict, release: dict, hashes: dict[str, str], allow_draft: bool = True) -> dict[str, dict]:
+    _validate_release_metadata(config, release, allow_draft)
+    inventory = _validate_asset_inventory(release, hashes)
     require(release["draft"] or set(inventory) == NEW_FILES, "Published Detector release is incomplete")
     return inventory
 
@@ -221,7 +231,11 @@ class GitHub:
             data = None if payload is None else json.dumps(payload).encode("utf-8")
             if data is not None:
                 headers["Content-Type"] = "application/json"
-        with self.opener.open(urllib.request.Request(api_url(path), data=data, headers=headers, method=method), timeout=180) as response:
+        url = api_url(path)
+        if method == "GET":
+            headers.update({"Cache-Control": "no-cache", "Pragma": "no-cache"})
+            url += ("&" if "?" in url else "?") + "detector_readback=" + str(time.time_ns())
+        with self.opener.open(urllib.request.Request(url, data=data, headers=headers, method=method), timeout=180) as response:
             return json.load(response)
 
     def optional(self, path: str):
@@ -246,7 +260,11 @@ class GitHub:
         require(not destination.exists(), "Download destination already exists")
         accept = "application/octet-stream" if path.startswith("releases/assets/") else "application/vnd.github+json"
         print(f"Verify download: {path}", flush=True)
-        with self.opener.open(urllib.request.Request(api_url(path), headers=self.headers(accept)), timeout=180) as source, destination.open("xb") as target:
+        headers = self.headers(accept)
+        headers.update({"Cache-Control": "no-cache", "Pragma": "no-cache"})
+        url = api_url(path)
+        url += ("&" if "?" in url else "?") + "detector_readback=" + str(time.time_ns())
+        with self.opener.open(urllib.request.Request(url, headers=headers), timeout=180) as source, destination.open("xb") as target:
             shutil.copyfileobj(source, target)
 
 
@@ -282,19 +300,63 @@ def validate_actor(environment) -> None:
 
 
 def verify_download(api: GitHub, asset: dict, digest: str, destination: Path) -> None:
-    api.download(f"releases/assets/{asset['id']}", destination)
+    for attempt in range(6):
+        try:
+            api.download(f"releases/assets/{asset['id']}", destination)
+            break
+        except urllib.error.HTTPError as error:
+            if error.code != 404 or destination.exists() or attempt == 5:
+                raise
+            print(f"Read-only Detector asset visibility retry {attempt + 1}/6", flush=True)
+            time.sleep(2)
     require(destination.stat().st_size == asset.get("size") and sha256(destination) == digest, f"Downloaded Detector asset checksum mismatch: {asset['name']}")
 
 
-def get_release(api: GitHub):
-    # The list includes drafts visible to this token, unlike release-by-tag.
-    matches = [release for release in api.pages("releases") if release.get("tag_name") == TAG]
-    require(len(matches) <= 1, "Multiple Detector releases use the requested tag")
-    if not matches:
-        return None
-    release = api.request("GET", f"releases/{matches[0]['id']}")
-    release["assets"] = api.pages(f"releases/{release['id']}/assets")
-    return release
+def get_release(api: GitHub, release_id: int | None = None, *, config: dict | None = None,
+                hashes: dict[str, str] | None = None, expected_assets: dict[str, dict] | None = None,
+                published: bool = False):
+    # Discover only before we have an ID. Collections can lag a successful POST;
+    # all post-create/resume reads therefore use the exact known release ID.
+    if release_id is None:
+        matches = [release for release in api.pages("releases") if release.get("tag_name") == TAG]
+        require(len(matches) <= 1, "Multiple Detector releases use the requested tag")
+        if not matches:
+            return None
+        release_id = matches[0]["id"]
+    require(positive_int(release_id), "Invalid known Detector release ID")
+    expected_assets = expected_assets or {}
+    attempts = 6
+    for attempt in range(attempts):
+        try:
+            release = api.request("GET", f"releases/{release_id}")
+            require(release.get("id") == release_id, "Detector release identity changed concurrently")
+            release["assets"] = api.pages(f"releases/{release_id}/assets")
+        except urllib.error.HTTPError as error:
+            if error.code != 404 or attempt == attempts - 1:
+                raise
+            pending = "known release/assets endpoint is not visible yet"
+        else:
+            if config is None or hashes is None:
+                return release
+            # A real source/body/asset mismatch fails immediately. Only absent
+            # known uploaded receipts or our draft->published transition may lag.
+            _validate_release_metadata(config, release)
+            inventory = _validate_asset_inventory(release, hashes)
+            for name, expected in expected_assets.items():
+                if name in inventory:
+                    fields = ("id", "name", "size", "digest", "state")
+                    require(all(inventory[name].get(field) == expected.get(field) for field in fields),
+                            f"Known Detector asset identity changed: {name}")
+            missing = set(expected_assets) - set(inventory)
+            if not missing and not (published and release["draft"]):
+                validate_release(config, release, hashes, allow_draft=not published)
+                return release
+            pending = "known uploaded assets are not visible yet" if missing else "published state is not visible yet"
+        if attempt == attempts - 1:
+            raise ValueError(f"Detector release readback did not become visible: {pending}")
+        print(f"Read-only Detector release visibility retry {attempt + 1}/{attempts}: {pending}", flush=True)
+        time.sleep(2)
+    raise AssertionError("Bounded release readback exhausted")
 
 
 def publish(config: dict, work: Path, mutate: bool) -> dict:
@@ -315,7 +377,7 @@ def publish(config: dict, work: Path, mutate: bool) -> dict:
     before = snapshot_others(api)
     tag_path = "git/ref/tags/" + TAG
     tag = api.optional(tag_path)
-    release = get_release(api)
+    release = get_release(api, config=config, hashes=hashes)
     if tag is not None:
         validate_tag(config, tag)
     if release is not None:
@@ -339,8 +401,9 @@ def publish(config: dict, work: Path, mutate: bool) -> dict:
         release = api.request("POST", "releases", {"tag_name": TAG, "target_commitish": config["source_sha"], "name": TITLE, "body": build_body(config), "draft": True, "prerelease": True, "generate_release_notes": False, "make_latest": "false"})
         validate_release(config, release, hashes)
     release_id = release["id"]
+    expected_assets = dict(validate_release(config, release, hashes))
     for name in sorted(hashes):
-        fresh = get_release(api)
+        fresh = get_release(api, release_id, config=config, hashes=hashes, expected_assets=expected_assets)
         require(fresh is not None and fresh["id"] == release_id, "Detector release identity changed concurrently")
         inventory = validate_release(config, fresh, hashes)
         validate_tag(config, api.request("GET", tag_path))
@@ -352,7 +415,8 @@ def publish(config: dict, work: Path, mutate: bool) -> dict:
         else:
             asset = inventory[name]
         verify_download(api, asset, hashes[name], work / ("verified-" + name))
-    fresh = get_release(api)
+        expected_assets[name] = asset
+    fresh = get_release(api, release_id, config=config, hashes=hashes, expected_assets=expected_assets)
     require(fresh is not None and fresh["id"] == release_id, "Detector release changed before publication")
     inventory = validate_release(config, fresh, hashes)
     require(set(inventory) == NEW_FILES, "Detector asset inventory incomplete")
@@ -360,7 +424,7 @@ def publish(config: dict, work: Path, mutate: bool) -> dict:
     validate_tag(config, api.request("GET", tag_path))
     if fresh["draft"]:
         api.request("PATCH", f"releases/{release_id}", {"draft": False, "make_latest": "false"})
-    final = get_release(api)
+    final = get_release(api, release_id, config=config, hashes=hashes, expected_assets=expected_assets, published=True)
     require(final is not None and final["id"] == release_id, "Final Detector release identity changed")
     inventory = validate_release(config, final, hashes, allow_draft=False)
     validate_tag(config, api.request("GET", tag_path))
@@ -387,7 +451,7 @@ def main() -> int:
         publish(config, arguments.work_dir, arguments.publish)
         return 0
     except Exception as error:
-        print(f"Publication stopped: {type(error).__name__}: {error}. No overwrite, deletion, rollback or automatic retry is performed.", file=sys.stderr)
+        print(f"Publication stopped: {type(error).__name__}: {error}. No overwrite, deletion, rollback or automatic mutation retry is performed.", file=sys.stderr)
         return 1
 
 

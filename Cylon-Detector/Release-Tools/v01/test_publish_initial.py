@@ -2,12 +2,16 @@
 import copy
 import hashlib
 import importlib.util
+import io
 import json
 from pathlib import Path
 import stat
 import tempfile
 import unittest
 import urllib.request
+import urllib.error
+import urllib.parse
+from unittest.mock import Mock, patch
 import zipfile
 
 SPEC = importlib.util.spec_from_file_location("detector_initial_publisher", Path(__file__).with_name("publish_initial.py"))
@@ -112,6 +116,121 @@ class PublicationGuards(unittest.TestCase):
         for name in p.NEW_FILES: self.assertIn(p.asset_url(name), body)
         for phrase in ("CapabilityAccessManager", "physical", "audio", "video", "payload"):
             self.assertIn(phrase.lower(), body.lower())
+
+
+class ReleaseReadbackGuards(unittest.TestCase):
+    def fake_api(self, cfg, responses, asset_lists):
+        api = Mock()
+        api.request.side_effect = [copy.deepcopy(value) for value in responses]
+        api.pages.side_effect = [copy.deepcopy(value) for value in asset_lists]
+        return api
+
+    def test_known_id_reads_do_not_use_a_stale_release_collection(self):
+        cfg = config(); hashes = {name: "d" * 64 for name in p.NEW_FILES}
+        api = self.fake_api(cfg, [release(cfg)], [[]])
+        found = p.get_release(api, 987654, config=cfg, hashes=hashes)
+        self.assertEqual(found["id"], 987654)
+        api.request.assert_called_once_with("GET", "releases/987654")
+        api.pages.assert_called_once_with("releases/987654/assets")
+
+    def test_resume_discovery_retries_only_direct_visibility_after_an_id_is_known(self):
+        cfg = config(); hashes = {name: "d" * 64 for name in p.NEW_FILES}
+        api = Mock()
+        api.pages.side_effect = [[release(cfg)], []]
+        api.request.side_effect = [urllib.error.HTTPError("synthetic", 404, "Not visible", {}, None), release(cfg)]
+        with patch.object(p.time, "sleep") as wait:
+            found = p.get_release(api, config=cfg, hashes=hashes)
+        self.assertEqual(found["id"], 987654)
+        self.assertEqual(api.pages.call_args_list[0].args, ("releases",))
+        self.assertEqual(api.pages.call_args_list[1].args, ("releases/987654/assets",))
+        self.assertTrue(all(call.args == ("GET", "releases/987654") for call in api.request.call_args_list))
+        wait.assert_called_once_with(2)
+
+    def test_known_uploaded_receipt_can_be_temporarily_absent_without_upload_retry(self):
+        cfg = config(); name = sorted(p.NEW_FILES)[0]; hashes = {item: "d" * 64 for item in p.NEW_FILES}
+        asset = release(cfg, {name: hashes[name]})["assets"][0]
+        api = self.fake_api(cfg, [release(cfg), release(cfg)], [[], [asset]])
+        with patch.object(p.time, "sleep") as wait:
+            found = p.get_release(api, 987654, config=cfg, hashes=hashes, expected_assets={name: asset})
+        self.assertEqual(found["assets"], [asset])
+        self.assertTrue(all(call.args[0] == "GET" for call in api.request.call_args_list))
+        self.assertEqual(api.request.call_count, 2)
+        wait.assert_called_once_with(2)
+
+    def test_mismatched_source_body_asset_or_known_identity_never_retries(self):
+        cfg = config(); hashes = {name: "d" * 64 for name in p.NEW_FILES}
+        original = release(cfg, hashes); known = {asset["name"]: asset for asset in original["assets"]}
+        for mutation in ("source", "body", "digest", "asset_id"):
+            changed = copy.deepcopy(original)
+            if mutation == "source": changed["target_commitish"] = "0" * 40
+            if mutation == "body": changed["body"] = "concurrent notes edit"
+            if mutation == "digest": changed["assets"][0]["digest"] = "sha256:" + "e" * 64
+            if mutation == "asset_id": changed["assets"][0]["id"] += 1000
+            api = self.fake_api(cfg, [changed], [changed["assets"]])
+            with self.subTest(mutation=mutation), patch.object(p.time, "sleep") as wait:
+                with self.assertRaises(ValueError):
+                    p.get_release(api, 987654, config=cfg, hashes=hashes, expected_assets=known)
+                wait.assert_not_called()
+                self.assertEqual(api.request.call_count, 1)
+
+    def test_visibility_retries_are_bounded_and_permission_errors_are_not_retried(self):
+        cfg = config(); hashes = {name: "d" * 64 for name in p.NEW_FILES}
+        for status, attempts in ((404, 6), (403, 1)):
+            api = Mock(); api.request.side_effect = urllib.error.HTTPError("synthetic", status, "Unavailable", {}, None)
+            with self.subTest(status=status), patch.object(p.time, "sleep") as wait:
+                with self.assertRaises(urllib.error.HTTPError):
+                    p.get_release(api, 987654, config=cfg, hashes=hashes)
+                self.assertEqual(api.request.call_count, attempts)
+                self.assertEqual(wait.call_count, attempts - 1)
+
+    def test_published_state_visibility_can_lag_but_incomplete_unexpected_publication_fails(self):
+        cfg = config(); hashes = {name: "d" * 64 for name in p.NEW_FILES}
+        draft = release(cfg, hashes); public = release(cfg, hashes, draft=False)
+        known = {asset["name"]: asset for asset in draft["assets"]}
+        api = self.fake_api(cfg, [draft, public], [draft["assets"], public["assets"]])
+        with patch.object(p.time, "sleep") as wait:
+            found = p.get_release(api, 987654, config=cfg, hashes=hashes, expected_assets=known, published=True)
+        self.assertFalse(found["draft"])
+        wait.assert_called_once_with(2)
+        incomplete = release(cfg, draft=False)
+        api = self.fake_api(cfg, [incomplete], [[]])
+        with patch.object(p.time, "sleep") as wait:
+            with self.assertRaises(ValueError): p.get_release(api, 987654, config=cfg, hashes=hashes)
+            wait.assert_not_called()
+
+    def test_fresh_gets_use_official_host_cache_controls_and_unique_query_nonces(self):
+        api = p.GitHub("synthetic-test-token")
+        api.opener = Mock()
+        api.opener.open.side_effect = lambda *args, **kwargs: io.BytesIO(b"{}")
+        with patch.object(p.time, "time_ns", side_effect=[101, 102]):
+            api.request("GET", "releases/987654")
+            api.request("GET", "releases/987654")
+        requests = [call.args[0] for call in api.opener.open.call_args_list]
+        self.assertEqual(len({request.full_url for request in requests}), 2)
+        for request in requests:
+            self.assertEqual(urllib.parse.urlparse(request.full_url).netloc, "api.github.com")
+            headers = {key.lower(): value for key, value in request.headers.items()}
+            self.assertEqual(headers["cache-control"], "no-cache")
+            self.assertEqual(headers["pragma"], "no-cache")
+            self.assertIn("detector_readback=", request.full_url)
+
+    def test_binary_read_visibility_retry_keeps_exact_hash_verification(self):
+        with tempfile.TemporaryDirectory() as temp:
+            destination = Path(temp) / "verified.bin"; data = b"synthetic exact bytes"
+            asset = {"id": 123, "name": "Detector.bin", "size": len(data)}
+            api = Mock(); calls = 0
+            def download(path, output):
+                nonlocal calls
+                calls += 1
+                if calls == 1: raise urllib.error.HTTPError("synthetic", 404, "Not visible", {}, None)
+                output.write_bytes(data)
+            api.download.side_effect = download
+            with patch.object(p.time, "sleep") as wait:
+                p.verify_download(api, asset, hashlib.sha256(data).hexdigest(), destination)
+            self.assertEqual(calls, 2)
+            wait.assert_called_once_with(2)
+            with self.assertRaises(ValueError):
+                p.verify_download(api, asset, "0" * 64, Path(temp) / "bad-hash.bin")
 
 
 class ArchiveGuards(unittest.TestCase):
