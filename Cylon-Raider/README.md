@@ -12,6 +12,6 @@
 
 ## Licensing and development
 
-Project-owned source and original project material in this directory are available under the [MIT License](LICENSE), subject to [third-party distribution notices](Windows/docs/THIRD-PARTY.md) and any material-specific restrictions. This documentation update does not alter existing downloaded assets or supersede their included notices.
+Project-owned source and original project material in this directory are available under the [MIT License](LICENSE), subject to [third-party distribution notices](Windows/docs/THIRD-PARTY.md) and any material-specific restrictions. The [repository-wide MIT grant](../LICENSING.md) expressly covers project-owned material in existing downloads; the downloads, their checksums and third-party notices remain unchanged.
 
 See [project memory](PROJECT_MEMORY.md) and the [shared testing policy](../testing/TEST_POLICY.md).
