@@ -12,4 +12,4 @@
 
 ## Licensing and development
 
-Project-owned material published under this directory is [MIT-licensed](LICENSE), subject to third-party rights and package-specific notices. This license does not change earlier downloaded artifacts automatically. See [project memory](PROJECT_MEMORY.md) and the [shared testing policy](../testing/TEST_POLICY.md).
+Project-owned material published under this directory is [MIT-licensed](LICENSE), subject to third-party rights and package-specific notices. The [repository-wide licensing scope](../LICENSING.md) expressly covers project-owned portions of earlier downloadable releases; their original files and third-party notices remain unchanged. See [project memory](PROJECT_MEMORY.md) and the [shared testing policy](../testing/TEST_POLICY.md).

@@ -17,9 +17,11 @@ Having a release download does not mean corresponding source is included in the 
 
 ## Licensing
 
-Each of the six application directories has its own **MIT License**, using identical terms, for project-owned source, documentation and original material in that directory unless separately stated. Battery Charge Control Windows also retains its existing, identical [Windows-specific LICENSE](Battery-Charge-Control/Windows/LICENSE). These app-scoped licenses do not automatically grant rights to third-party material or relicense earlier uploaded release archives/binaries; those retain applicable accompanying notices. Shared top-level scripts and documentation are not automatically covered by any application-scoped license.
+The **[repository-wide MIT License](LICENSE)** covers original project-owned material throughout this public repository, including our six applications, shared scripts, tests, workflows, and documentation. All six application directories retain their identical MIT licenses; Battery Charge Control Windows also retains its matching [component license](Battery-Charge-Control/Windows/LICENSE).
 
-Public visibility alone is not an additional reuse grant. New releases must still review provenance, dependencies, third-party notices and platform-specific testing.
+The [licensing scope and historical-release statement](LICENSING.md) **expressly offers MIT permission for project-owned original material in all GitHub Release downloads, including previously published versions**, even when the corresponding source is not in `main`. This does not relicense third-party components, replace their conditions or notices, or change the release package bytes, descriptions, tags or checksums.
+
+A public download does not establish rights to third-party material. New releases still require provenance, dependency, third-party-notice and platform-specific testing reviews.
 
 ## Shared development
 
