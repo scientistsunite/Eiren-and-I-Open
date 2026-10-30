@@ -1,0 +1,7 @@
+**/bin/
+**/obj/
+**/__pycache__/
+publish/
+release-assets/
+ui-previews/
+*.user

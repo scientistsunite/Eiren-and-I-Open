@@ -40,3 +40,11 @@ Battery Charge Control Windows v0.1 is the first reviewed experimental **source-
 - **Current repository inventory:** BCC Windows and Cylon Raider Windows have public implementation source. Archive Reader, Silent Meteor and System Chronicle have historical release downloads but source directories remain placeholders. Cylon Detector is planned only.
 - **Verification:** Documentation/licensing edits only. No new application runtime or hardware tests are claimed.
 - **Follow-up:** Before any source import, binary redistribution or Release note update, review the actual material and third-party notices separately.
+
+## Cylon Detector Windows implementation — 2026-10-30
+
+- **Scope:** Owner-authorized reuse of public Cylon Raider 0.5.2 foundations for an independently identified Cylon Detector Windows 0.1 application. No private source/history is imported; other application implementations and releases are unchanged by this work.
+- **Behavior:** Read-only selected-user Windows microphone/camera usage metadata, one-second application network counts, a bounded five-minute RAM context, default sensor-triggered network detail, optional continuous detail, and device/anomaly observations share one main log. Separately located interval summaries include minute-level network aggregates and late committed observations. No audio/video/payload acquisition or application network requests are added.
+- **Status:** Windows source, app-specific tests and packaging are implemented. Final complete source-bound Windows CI, downloadable artifacts and release publication are pending. Physical sensor/ETW, pre-sign-in service, upgrade and display acceptance are not claimed. Ubuntu/macOS remain placeholders.
+- **Licensing:** Detector project-owned published material follows its existing app-scoped MIT license, subject to dependency notices and third-party rights. This does not change any other app's license.
+- **Follow-up:** Record the exact passing source/run, checksums and release URL in Detector memory and the public test matrix once verified.

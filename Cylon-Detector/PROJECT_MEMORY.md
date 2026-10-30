@@ -1,33 +1,17 @@
 # Cylon Detector — Public Project Memory
 
-**Status:** Concept and directory placeholders only. No Cylon Detector implementation, package or release is claimed.
+## 2026-10-30 — Owner-authorized Windows 0.1 implementation
 
-## Scope and architecture
+- User explicitly authorized public reuse of Cylon Raider 0.5.2 source/assets/build files, an independent Windows x64 Detector app, PRs/squash merging and publication of 0.1 installer/source/checksums and related files. No private sources or private history are used.
+- Core requirements: observable microphone/camera application access metadata; per-application one-second network measurements; always-on five-minute RAM prebuffer while monitoring; default event-triggered disk network detail with five-minute postroll; optional continuous detail; unified main SQLite log; separate configurable interval summaries; nonjudgmental anomaly observations at all times; local-only/no audio/video or payload capture; independent optional pre-sign-in service.
+- Derived runtime network/storage/service/UI foundations match the public Raider 0.5.2 source `36e4d96f8ed4933c108f942c5cd7a81da7bc840b` (public main differs only in version text/metadata). All development is isolated under Detector and its dedicated workflows; Raider and other app files/releases are unchanged.
+- Microphone/camera evidence uses Windows CapabilityAccessManager selected-owner metadata with explicit availability and observation-time limits. It does not promise universal device detection or infer inactive state from missing records.
+- Windows implementation, dedicated tests and packaging are present. A complete passing source-bound Windows CI run and initial release publication remain pending. No published Detector binary or physical acceptance is claimed yet. Ubuntu/macOS remain placeholders. Project-owned material follows the existing app-scoped MIT license, subject to third-party notices.
 
-Intended use: Review unusual local application/system behavior (planned concept). Implementation architecture remains to be reviewed in this public repository.
+## Architecture and current verification limits
 
-## Platform status
-
-| Platform | Implementation | Tests | Release |
-| --- | --- | --- | --- |
-| Windows | Not added | Not added | None |
-| Ubuntu | Not added | Not added | None |
-| macOS | Not added | Not added | None |
-
-## Public decisions
-
-No application-specific architecture or behavior has been adopted publicly.
-
-## Verification
-
-Only repository-level scaffolding checks are currently defined; they do not test the application.
-
-## Next steps
-
-Review source rights, dependencies, platform-specific tests, and release criteria before importing implementation. Record dated decisions using [MEMORY_SYNC.md](../MEMORY_SYNC.md). Never import private project notes or files without explicit review and authorization.
-
-## 2026-10-29 — MIT license and intended use
-
-- **Decision:** This app directory includes an MIT LICENSE for project-owned published material, subject to separate third-party rights.
-- **Verification:** Documentation only; no new runtime or functional test evidence.
-- **Follow-up:** Review licensing of specific historical downloadable assets separately; this update does not repackage or automatically relicense them.
+- **Device evidence:** Read only the configured owner's loaded CapabilityAccessManager registry scope. An unloaded hive, unsupported application/device path, malformed timestamps or stale metadata remains unavailable/uncertain evidence. No device is opened; no microphone samples, video, images or packet contents are acquired.
+- **Network privacy:** While monitoring runs, keep the five-minute per-application network context in RAM with a bounded delivery overlap and a 128 MiB estimated-data budget. Default detailed persistence spans five minutes before an observed sensor change through the half-open five-minute tail after the last fresh active evidence; overlapping windows extend it. Stale/missing observations do not fabricate a stop or extend detail indefinitely. Resource/transport/clock gaps remain explicit. Continuous detail is a separate opt-in setting.
+- **Main log and summaries:** Device observations, selected network detail, unfamiliar-network-application/rate-change indicators and lifecycle/coverage records use one Detector-specific main SQLite log. Minute-level aggregate context can be retained outside detailed capture windows for summaries. The separate configurable Reports folder contains interval CSV summaries and their internal report index. Summaries consume committed row IDs so delayed writes remain reportable, and distinguish temporal association from causation or threat findings.
+- **Isolation:** Detector has independent installer/uninstaller, executable, mutex, pipe, service, startup and data identities. Foreign main/report databases are rejected. Optional pre-sign-in monitoring uses the configured owner's protected storage and sensor scope; that user's unloaded hive can prevent device evidence before sign-in.
+- **Verification pending:** Dedicated measurement/history/quality, native settings/UI, sensor-decoder, privacy-policy, identity and summary suites plus privacy/source audits and installer smoke checks are implemented. Final passing Windows run, exact source SHA, artifact digests and publication evidence will be recorded after the complete gate succeeds. No physical device, real ETW, boot/upgrade, long-duration, multi-monitor or actual-DPI acceptance is claimed.

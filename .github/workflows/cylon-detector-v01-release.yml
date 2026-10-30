@@ -1,0 +1,51 @@
+name: Cylon Detector Windows initial verified publication
+
+on:
+  push:
+    branches: [cylon-detector-v01-release]
+    paths:
+      - '.github/workflows/cylon-detector-v01-release.yml'
+      - 'Cylon-Detector/Release-Tools/v01/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cylon-detector-windows-initial-publication
+  cancel-in-progress: false
+
+jobs:
+  publish-verified-initial:
+    if: github.repository == 'scientistsunite/Eiren-and-I-Open' && github.actor == 'scientistsunite' && github.event_name == 'push' && github.ref == 'refs/heads/cylon-detector-v01-release'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify publication guards with synthetic fixtures
+        run: python -m unittest discover -s Cylon-Detector/Release-Tools/v01 -p 'test_publish_initial.py' -v
+      - name: Publish only the pinned Detector build and verify other releases are preserved
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python Cylon-Detector/Release-Tools/v01/publish_initial.py --config Cylon-Detector/Release-Tools/v01/pins.json --work-dir "$RUNNER_TEMP/detector-initial-publication" --publish
+      - name: Retain public publication plan, receipts and preservation inventories
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CylonDetector-v01-publication-receipt
+          path: |
+            ${{ runner.temp }}/detector-initial-publication/plan.json
+            ${{ runner.temp }}/detector-initial-publication/receipt.json
+            ${{ runner.temp }}/detector-initial-publication/release-notes.md
+            ${{ runner.temp }}/detector-initial-publication/other-releases-before.json
+            ${{ runner.temp }}/detector-initial-publication/other-releases-after.json
+          if-no-files-found: ignore
+          retention-days: 14

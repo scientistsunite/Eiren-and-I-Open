@@ -1,0 +1,42 @@
+using Detector.Core;
+int checks=0;
+void Check(bool value,string name){if(!value)throw new Exception(name);Console.WriteLine("PASS "+name);checks++;}
+var t=new DateTime(2026,10,25,10,0,0,DateTimeKind.Utc);
+var p=new Identity(10,t.Ticks,"browser",@"C:\browser.exe");
+var a=new Aggregator(t);
+a.Add(new(t,p,Direction.Incoming,100));a.Add(new(t.AddMilliseconds(999),p,Direction.Outgoing,200));
+a.Add(new(t.AddSeconds(1),p,Direction.Incoming,300));
+Check(a.Advance(t.AddSeconds(2)).Length==0,"two-second watermark");
+var f=a.Advance(t.AddSeconds(3)).Single();
+Check(f.Rows.Single().Incoming==100 && f.Rows.Single().Outgoing==200,"independent directions / half-open second");
+Check(f.Complete && f.CoverageSeconds==1,"complete interval");
+Check(a.Advance(t.AddSeconds(4)).Single().Rows.Single().Incoming==300,"exact boundary in next bucket");
+a.Add(new(t,p,Direction.Incoming,99));
+Check(!a.Advance(t.AddSeconds(5)).Single().Complete,"late delivery damages integrity");
+var b=new Aggregator(t);
+b.Add(new(t,p,Direction.Incoming,10));b.Add(new(t,p with{StartUtcTicks=t.AddSeconds(1).Ticks},Direction.Outgoing,20));
+b.Add(new(t,null,Direction.Incoming,30));
+f=b.Advance(t.AddSeconds(3)).Single();
+Check(f.Rows.Length==3,"PID reuse identities never collapse / unattributed preserved");
+Check(f.Rows.Single(x=>x.Process is null).Incoming==30,"unknown bytes remain counted");
+b.Loss(4);f=b.Advance(t.AddSeconds(4)).Single();
+Check(!f.Complete && f.LostEvents==4,"loss explicit even when observed count zero");
+Check(!b.Advance(t.AddSeconds(100)).Single().Complete,"suspend gap bounded");
+var c=new Aggregator(t.AddMilliseconds(500));
+Check(!c.Advance(t.AddSeconds(3)).Single().Complete,"partial startup never a complete second");
+var d=new Aggregator(t);d.Add(new(t,p,Direction.Outgoing,-1));
+Check(!d.Advance(t.AddSeconds(3)).Single().Complete,"malformed size rejected");
+Check(new Aggregator(t).Advance(t.AddSeconds(3)).Single().Complete,"restart new integrity epoch");
+var groups=ApplicationGrouping.Group([new(p,10,20),new(p with{Pid=11},30,40),new(p with{Pid=12,Path=null},50,60),new(p with{Pid=13,Path=null},70,80)]);
+Check(groups.Length==3,"same path groups multiple processes; missing paths stay separate");
+Check(groups.Single(g=>g.Processes.Length==2).Incoming==40 && groups.Single(g=>g.Processes.Length==2).Outgoing==60,"application totals preserve independent directions");
+var overflow=new Aggregator(t);
+for(int i=0;i<8200;i++)overflow.Add(new(t,p with{Pid=i},Direction.Incoming,1));
+f=overflow.Advance(t.AddSeconds(3)).Single();
+Check(f.Rows.Length==8192 && !f.Complete && f.LostEvents==0 && f.Quality?.CapacityDelta==8,"bounded cardinality explicitly reports overflow");
+Check(a.Advance(t.AddSeconds(5)).Length==0,"no duplicate bucket on repeated tick");
+var bounded=new BoundedLineReader(new StringReader("first\nsecond\n"),6);
+Check(await bounded.ReadAsync(default)=="first" && await bounded.ReadAsync(default)=="second" && await bounded.ReadAsync(default) is null,"bounded framing preserves multiple records and EOF");
+try { await new BoundedLineReader(new StringReader(new string('x',10000)),100).ReadAsync(default);throw new Exception("oversize accepted"); } catch(IOException) { Check(true,"oversize frame rejected before unbounded buffering"); }
+try { await new BoundedLineReader(new StringReader("partial"),100).ReadAsync(default);throw new Exception("truncated accepted"); } catch(IOException) { Check(true,"truncated frame never parsed as complete measurement"); }
+Console.WriteLine($"{checks} synthetic checks passed; no live ETW validation claimed.");
