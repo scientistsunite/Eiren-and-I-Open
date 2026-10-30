@@ -34,4 +34,6 @@ Both preparation and publication require `GH_TOKEN`; preparation performs only A
 
 The original installer, portable archive and source bytes are preserved. Provenance and testing notes keep their build bytes under versioned names, and the uploaded checksum manifest reflects those names. The publisher records plan/notes before its first mutation, snapshots the other releases' metadata/assets and all other tag objects, verifies preservation before and after publication, and verifies all six final public downloads. These snapshots do not claim to revalidate historical binary contents. Download counters are excluded because readers can change them independently.
 
+After discovering or creating a release, read-back uses its exact release ID and fresh GET requests. Missing known post-write records may be retried up to six reads; source, body, asset identity and checksum mismatches still stop immediately. Mutations are never automatically retried. Receipt artifacts include the workflow attempt number so a resumed job preserves its earlier diagnostics.
+
 Only verified artifact/build pins and public receipts belong here. Hardware ETW/sensor coverage, boot service and physical-machine installer acceptance remain separate from hosted build and synthetic test evidence.
